@@ -24,7 +24,7 @@ class Getdata(torch.utils.data.Dataset):
         image_name  = self.data.loc[idx][5]
         img_path    = os.path.join(self.root_img_dir, path, image_name)
 
-        image = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path)
         image = self.transform(image)
         label = self.data.loc[idx][6]
         position    = self.data.loc[idx][7]
@@ -56,7 +56,7 @@ class PrepareDataset:
             "validation": transforms.Compose([
                 transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
                 transforms.ToTensor(),
-                transforms.Normalize([0.47, 0.47, 0.47], [0.3,0.3,0.3])
+                # transforms.Normalize([0.4, 0.4, 0.4], [0.3,0.3,0.3])
             ])
         }
 
@@ -67,7 +67,7 @@ class PrepareDataset:
             transform = self.augment() 
             
             if category == 'test':  
-                test_dataset = Getdata(csv_file=self.config["dataset"]["test_csv"], transform=transform["test"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                test_dataset = Getdata(csv_file=self.config["dataset"]["test_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 test_loader = DataLoader(test_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
 
                 return test_loader
@@ -82,7 +82,7 @@ class PrepareDataset:
 
 
             else: 
-                train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["training"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 
                 # train_size = int(self.config["model"]["train_size"] * len(train_dataset))
                 # val_size = int(len(train_dataset) - train_size)
@@ -91,7 +91,7 @@ class PrepareDataset:
                 # Define the dataloaders with the samplers
                 train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
                 
-                return train_loader, val_loader
+                return train_loader
 
 
                

@@ -1,7 +1,9 @@
 import torch
-import torchvision
 import os
 import pandas as pd
+import yaml
+from tqdm import tqdm
+import numpy as np 
 
 from train.training import Classification
 from train.dataset import PrepareDataset
@@ -24,7 +26,7 @@ class Predict(Classification):
         predicted, target, image_name = [],[],[]
 
         with torch.no_grad(): 
-            for (images, label, _, img_name) in self.test_data: 
+            for (images, label, _, img_name) in tqdm(self.test_data): 
                 images = images.to(self.device)
                 label = label.to(self.device)
                 outputs = self.model(images)
@@ -36,10 +38,32 @@ class Predict(Classification):
                 image_name.append(img_name)
 
 
-        accuracy, f1, precision, recall = self.calculate_metrics(predicted=predicted, targets=target)
+        accuracy, f1, precision, recall, bal_acc = self.calculate_metrics(predicted=predicted, targets=target)
         
-        print(f"Acc: {accuracy} f1:{f1}, val: {precision}, recall: {recall}")
+        print(f"Acc: {accuracy} f1:{f1}, precision: {precision}, recall: {recall}, bal_acc: {bal_acc}")
+
+       
+        predicted = np.concatenate(predicted)
+        target = np.concatenate(target)
+        image_name = np.concatenate(image_name)
+
+        df = pd.DataFrame(list(zip(image_name, predicted, target)), columns=['name', 'predicted', 'target'])
+
+        csv_name = self.config["test"]["name"]
+        csv_name = csv_name.replace('.pt', '.csv')
 
 
-        df = pd.DataFrame([image_name, predicted, target], columns=['name', 'predicted', 'target'])
-        df.to_csv("predictions.csv", index=False)
+        df.to_csv('/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/'+csv_name, index=False)
+
+
+
+def load_config(config_name):
+    with open(os.path.join("/home/phuntsho/Desktop/plot-finder/plot-finder/", config_name)) as file:
+        config = yaml.safe_load(file)
+    return config
+
+def run(): 
+    config = load_config("config.yml")
+    model = Predict(config)
+    model.setup_testing()
+    model.predict()

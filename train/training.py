@@ -8,11 +8,13 @@ import sklearn.metrics as metrics
 import copy
 from fastprogress import progress_bar
 from torchsummary import summary
+from datetime import datetime 
+from PIL import Image
+import matplotlib.pyplot as plt
 
 from train.model import get_model 
 from train.dataset import PrepareDataset
 
-torch.manual_seed(10)
 
 class Classification: 
     def __init__(self, config: object) -> None:
@@ -39,7 +41,8 @@ class Classification:
 
     def save_model(self, model_wts, run): 
         try: 
-            torch.save(model_wts, os.path.join(self.config["model"]["save_model"], f"{run}.pt"))
+            path = os.path.join(self.config["model"]["save_model"], f"{run}.pt")
+            torch.save(model_wts, path)
         except: 
             print("Save directory not found!")
 
@@ -52,8 +55,8 @@ class Classification:
         f1 = metrics.f1_score(targets, predicted)
         precision = metrics.precision_score(targets, predicted)
         recall = metrics.recall_score(targets, predicted)
-        
-        return accuracy, f1, precision, recall
+        bal_acc = metrics.balanced_accuracy_score(targets, predicted)       
+        return accuracy, f1, precision, recall, bal_acc
 
     def setup_optimizer(self):
         optimizer = self.config["model"]["optimizer"]
@@ -69,7 +72,7 @@ class Classification:
     
     def setup_loss_fnc(self):
         loss = self.config["model"]["loss"]
-        loss_weight = torch.tensor([1.0, 3.0], dtype=torch.float, device='cuda')
+        loss_weight = torch.tensor([1.0, 7.0], dtype=torch.float, device='cuda')
         
         if loss == "BCEWithLogitsLoss":
             self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight = loss_weight[1])
@@ -77,18 +80,61 @@ class Classification:
             self.criterion = torch.nn.CrossEntropyLoss(weight = loss_weight)
             
     def setup_scheduler(self):
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-                    self.optimizer, 
-                    mode='max', 
-                    factor=0.1, 
-                    patience=3, 
-                    threshold=0.01, 
-                    threshold_mode='rel', 
-                    cooldown=0, 
-                    min_lr=0, eps=1e-08, 
-                    verbose=True)
+        schedule = self.config["model"]["scheduler"] 
+        if schedule == "cycliclr_exp_range": 
+            self.scheduler = torch.optim.CyclicLR(self.optimizer, 
+                base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
+                max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
+                step_size_up = 500, # Number of training iterations in the increasing half of a cycle
+                verbose= True,
+                mode = "exp_range")
 
-    
+        elif schedule == "cycliclr_triangle":
+            self.scheduler = torch.optim.CyclicLR(self.optimizer, 
+                base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
+                max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
+                verbose= True,
+                step_size_up = 500, # Number of training iterations in the increasing half of a cycle
+                mode = "triangle")
+            
+        elif schedule == "cosineannealing": 
+            self.scheduler = torch.optim.CosineAnnealingWarmRestarts(self.optimizer, 
+                T_0 = 8,# Number of iterations for the first restart
+                T_mult = 1, # A factor increases TiTi​ after a restart
+                verbose= True,
+                eta_min = 1e-5) # Minimum learning rate
+        
+        elif schedule == "cosine_onecyclelr": 
+            self.scheduler = torch.optim.OneCycleLR(self.optimizer, 
+                max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
+                steps_per_epoch = 8, # The number of steps per epoch to train for.
+                epochs = self.config["model"]["epochs"], # The number of epochs to train for.
+                verbose= True,
+                anneal_strategy = 'cos') # Specifies the annealing strategy
+
+        else: 
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer, 
+                mode='max', 
+                factor=0.1, 
+                patience=5, 
+                threshold=0.03, 
+                threshold_mode='rel', 
+                cooldown=0, 
+                min_lr=0, eps=1e-08, 
+                verbose=True)
+
+    def display_image(self, images, labels, image_name): 
+        plt.figure(figsize=(10, 10))
+        for i in range(16):
+            ax = plt.subplot(4, 4, i + 1)
+            img = images[i]
+            img = img.permute(2, 1, 0)
+            plt.imshow(img.numpy())
+            plt.title([image_name[i], labels[i]], fontsize = 8)
+            plt.axis("off")
+
+        plt.show()       
     
     def one_epoch(self, train=True, epoch=0): 
         if train: 
@@ -98,15 +144,14 @@ class Classification:
         else: 
             self.model.eval()
             pbar = progress_bar(self.val_loader, leave=False)
-            # size = len(self.validation_loader.dataset)
 
         predicted, targets = [], [] 
         for _, (images, labels, position, img_name) in enumerate(pbar): 
             with torch.autocast("cuda") and (torch.inference_mode() if not train else torch.enable_grad()): 
                 
-                if not self.displayed: 
-                    self.display_image(images, labels)
-                    self
+                #if not self.displayed: 
+                #    self.display_image(images, labels, img_name)
+                #    self.displayed = True
 
                 images = images.to(self.device)
                 labels = labels.to(self.device)
@@ -132,7 +177,7 @@ class Classification:
 
 
 
-        accuracy, f1, precision, recall = self.calculate_metrics(predicted=predicted, targets=targets)
+        accuracy, f1, precision, recall, bal_acc = self.calculate_metrics(predicted=predicted, targets=targets)
 
         if self.config["wandb"]["use"]: 
             prefix = "train" if train else "validation"
@@ -142,10 +187,11 @@ class Classification:
             wandb.log({f"{prefix}_f1": f1, "epoch":epoch})
             wandb.log({f"{prefix}_precision":precision, "epoch":epoch})
             wandb.log({f"{prefix}_recall":recall, "epoch":epoch})
+            wandb.log({f"{prefix}_bal_accuracy":bal_acc, "epoch":epoch})
 
         model_wts = copy.deepcopy(self.model.state_dict())
 
-        return model_wts, accuracy, f1, precision, recall
+        return model_wts, accuracy, f1, precision, recall, bal_acc
     
 
     def train(self): 
@@ -160,28 +206,37 @@ class Classification:
         data = PrepareDataset(self.config)
         self.train_loader = data.prepare_dataset(category = "train")
         self.val_loader = data.prepare_dataset(category = "validation")
-        
+        self.displayed = False
+
         print(f"Train dataset length: {len(self.train_loader.dataset)} \nValidation dataset length: {len(self.val_loader.dataset)}")
 
         self.model = self.model.to(self.device)
         # print(summary(self.model, (3, 299, 299)))
-        
+
+        # for name, module in self.model.named_children():
+        #     print(name)
+        #     print(module)
+
         best_f1 = 0.0
+        date = datetime.now()
+        date = date.strftime("day_%d_month_%m_time_%H_%M") 
+
         for epoch in progress_bar(range(self.config["model"]["epochs"]), total=self.config["model"]["epochs"], leave=True):
             # train
-            _, epoch_acc, epoch_f1, tprecision, trecall  = self.one_epoch(train=True, epoch=epoch)
+            _, epoch_acc, epoch_f1, tprecision, trecall, t_bal_acc  = self.one_epoch(train=True, epoch=epoch)
             
             #validate
-            model_wts, accuracy, f1, precision, recall = self.one_epoch(train=False, epoch=epoch)
+            model_wts, accuracy, f1, precision, recall, bal_acc = self.one_epoch(train=False, epoch=epoch)
 
-            print(f"Epoch {epoch}: \ntraining acc: {epoch_acc},  validation acc: {accuracy} training f1:{epoch_f1}, validation f1: {f1}, training precision: {tprecision}, val preciison: {precision}, train recall: {trecall}, val recall:{recall} \n")
-
-            self.scheduler.step(accuracy)
+            print(f"Epoch {epoch}: \ntraining acc: {epoch_acc},  validation acc: {accuracy} training f1:{epoch_f1}, validation f1: {f1}, training precision: {tprecision}, val preciison: {precision}, train recall: {trecall}, val recall:{recall} train_bal_acc: {t_bal_acc}, val bal_acc: {bal_acc}\n")
+            self.scheduler.step(f1)
 
             if f1 > best_f1: 
-                run_name = f'{self.config["model"]["name"]}_{self.config["model"]["optimizer"]}_lr_{self.config["model"]["lr"]}_epoch_{self.config["model"]["epochs"]}'
+                run_name = f'{self.config["model"]["name"]}_{self.config["model"]["optimizer"]}_lr_{self.config["model"]["lr"]}_epoch_{self.config["model"]["epochs"]}_{date}'
+
                 self.save_model(model_wts, run_name)
-            
+        print(f"Best f1 score: {best_f1}")
+
 
 def load_config(config_name):
     with open(os.path.join("/home/phuntsho/Desktop/plot-finder/plot-finder/", config_name)) as file:
@@ -192,6 +247,7 @@ def load_config(config_name):
 def run(): 
     config = load_config("config.yml")
     classifier = Classification(config)
+ 
     with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 

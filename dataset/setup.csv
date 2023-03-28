@@ -1,5 +1,13 @@
 year,trial,date,camera,range,image,class,position,img_path 
+2019,NUE_1,2019-08-07,left_outside_L2,range_1,G0660938.JPG,0,745,2019/NUE_1/2019-08-07/left_outside_L2/range_1
+2019,NUE_1,2019-08-07,left_outside_L2,range_1,G0660939.JPG,0,746,2019/NUE_1/2019-08-07/left_outside_L2/range_1
 2019,NUE_1,2019-07-10,left_middle_L1,range_4,G0392921.JPG,0,1,2019/NUE_1/2019-07-10/left_middle_L1/range_4
+2019,NUE_2,2019-07-17,left_middle_L1,range_1,G0519100.JPG,0,423,2019/NUE_2/2019-07-17/left_middle_L1/range_1
+2019,NUE_2,2019-07-17,left_middle_L1,range_1,G0519101.JPG,0,424,2019/NUE_2/2019-07-17/left_middle_L1/range_1
+2019,NUE_2,2019-06-27,left_middle_L1,range_8_click_2,G0183377.JPG,0,402,2019/NUE_2/2019-06-27/left_middle_L1/range_8_click_2
+2019,NUE_2,2019-06-27,left_middle_L1,range_8_click_2,G0183378.JPG,0,403,2019/NUE_2/2019-06-27/left_middle_L1/range_8_click_2
+2019,NUE_1,2019-07-17,left_middle_L1,range_1,G0342539.JPG,0,474,2019/NUE_1/2019-07-17/left_middle_L1/range_1
+2019,NUE_1,2019-07-17,left_middle_L1,range_1,G0342540.JPG,0,475,2019/NUE_1/2019-07-17/left_middle_L1/range_1
 2019,NUE_1,2019-07-10,left_middle_L1,range_4,G0392922.JPG,0,2,2019/NUE_1/2019-07-10/left_middle_L1/range_4
 2019,NUE_1,2019-07-10,left_middle_L1,range_4,G0392923.JPG,0,3,2019/NUE_1/2019-07-10/left_middle_L1/range_4
 2019,NUE_1,2019-07-10,left_middle_L1,range_4,G0392924.JPG,0,4,2019/NUE_1/2019-07-10/left_middle_L1/range_4
