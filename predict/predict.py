@@ -53,12 +53,12 @@ class Predict(Classification):
         csv_name = csv_name.replace('.pt', '.csv')
 
 
-        df.to_csv('/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/'+csv_name, index=False)
+        df.to_csv('predict/result/'+csv_name, index=False)
 
 
 
 def load_config(config_name):
-    with open(os.path.join("/home/phuntsho/Desktop/plot-finder/plot-finder/", config_name)) as file:
+    with open(config_name) as file:
         config = yaml.safe_load(file)
     return config
 

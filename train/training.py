@@ -240,7 +240,7 @@ class Classification:
 
 
 def load_config(config_name):
-    with open(os.path.join("/home/phuntsho/Desktop/plot-finder/plot-finder/", config_name)) as file:
+    with open(config_name) as file:
         config = yaml.safe_load(file)
     return config
 
