@@ -11,6 +11,7 @@ from torchsummary import summary
 from datetime import datetime 
 from PIL import Image
 import matplotlib.pyplot as plt
+import random
 
 from train.model import get_model 
 from train.dataset import PrepareDataset
@@ -82,34 +83,32 @@ class Classification:
     def setup_scheduler(self):
         schedule = self.config["model"]["scheduler"] 
         if schedule == "cycliclr_exp_range": 
-            self.scheduler = torch.optim.CyclicLR(self.optimizer, 
+            self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, 
                 base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
                 step_size_up = 500, # Number of training iterations in the increasing half of a cycle
-                verbose= True,
+                cycle_momentum = False,
                 mode = "exp_range")
 
         elif schedule == "cycliclr_triangle":
-            self.scheduler = torch.optim.CyclicLR(self.optimizer, 
+            self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, 
                 base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
-                verbose= True,
+                cycle_momentum = False,
                 step_size_up = 500, # Number of training iterations in the increasing half of a cycle
-                mode = "triangle")
+                mode = "triangular")
             
         elif schedule == "cosineannealing": 
-            self.scheduler = torch.optim.CosineAnnealingWarmRestarts(self.optimizer, 
+            self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, 
                 T_0 = 8,# Number of iterations for the first restart
                 T_mult = 1, # A factor increases TiTi​ after a restart
-                verbose= True,
                 eta_min = 1e-5) # Minimum learning rate
         
         elif schedule == "cosine_onecyclelr": 
-            self.scheduler = torch.optim.OneCycleLR(self.optimizer, 
+            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, 
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
                 steps_per_epoch = 8, # The number of steps per epoch to train for.
                 epochs = self.config["model"]["epochs"], # The number of epochs to train for.
-                verbose= True,
                 anneal_strategy = 'cos') # Specifies the annealing strategy
 
         else: 
@@ -167,10 +166,14 @@ class Classification:
 
                 one_hot_targets = torch.nn.functional.one_hot(labels, 2)
                 loss = self.criterion(outputs, one_hot_targets.float())
-
+                
                 if train:
+                    #if self.config["model"]["scheduler"] == "cycliclr_triangle":
                     loss.backward()
                     self.optimizer.step()
+                    self.scheduler.step()
+                    if self.config['wandb']['use']:
+                        wandb.log({"learning rate:":self.scheduler.get_last_lr()[0],"epoch":epoch})
                     self.optimizer.zero_grad()
 
                 pbar.comment = f"loss={loss.item():2.3f}"
@@ -218,8 +221,6 @@ class Classification:
         #     print(module)
 
         best_f1 = 0.0
-        date = datetime.now()
-        date = date.strftime("day_%d_month_%m_time_%H_%M") 
 
         for epoch in progress_bar(range(self.config["model"]["epochs"]), total=self.config["model"]["epochs"], leave=True):
             # train
@@ -232,7 +233,7 @@ class Classification:
             self.scheduler.step(f1)
 
             if f1 > best_f1: 
-                run_name = f'{self.config["model"]["name"]}_{self.config["model"]["optimizer"]}_lr_{self.config["model"]["lr"]}_epoch_{self.config["model"]["epochs"]}_{date}'
+                run_name = f'{self.config["model"]["name"]}_{self.config["model"]["optimizer"]}_lr_{self.config["model"]["lr"]}_epoch_{self.config["model"]["epochs"]}_{self.config["model"]["identifier"]}'
 
                 self.save_model(model_wts, run_name)
         print(f"Best f1 score: {best_f1}")
@@ -246,6 +247,7 @@ def load_config(config_name):
 
 def run(): 
     config = load_config("config.yml")
+    config["model"]["identifier"] = random.randint(0, 10000000)
     classifier = Classification(config)
  
     with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():

@@ -18,7 +18,7 @@ model:
   name: inception_v3
   optimizer: Adam
   loss: BCEWithLogitsLoss
-  scheduler: linear
+  scheduler: cycliclr_exp_range
   lr: 0.001
   batch: 32
   classes: 2
@@ -28,6 +28,7 @@ model:
   save_model: /home/phuntsho/Desktop/plot-finder/plot-finder/models
   momentum: 0.9
   change: ""
+  identifier: 0 
 
 test: 
   name: resnet50_Adam_lr_0.001_epoch_30_day_27_month_03_time_20_13.pt
