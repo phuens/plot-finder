@@ -28,7 +28,7 @@ model:
   save_model: /home/phuntsho/Desktop/plot-finder/plot-finder/models
   momentum: 0.9
   change: ""
-  identifier: 0 
+  identifier: nuo 
 
 test: 
   name: resnet50_Adam_lr_0.001_epoch_30_day_27_month_03_time_20_13.pt

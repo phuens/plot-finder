@@ -5,6 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
+
+# model files
+config.yml
 *wandb/
 *models/
 *dataset/images
