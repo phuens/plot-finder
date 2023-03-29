@@ -229,8 +229,9 @@ class Classification:
             #validate
             model_wts, accuracy, f1, precision, recall, bal_acc = self.one_epoch(train=False, epoch=epoch)
 
-            print(f"Epoch {epoch}: \ntraining acc: {epoch_acc},  validation acc: {accuracy} training f1:{epoch_f1}, validation f1: {f1}, training precision: {tprecision}, val preciison: {precision}, train recall: {trecall}, val recall:{recall} train_bal_acc: {t_bal_acc}, val bal_acc: {bal_acc}\n")
-            self.scheduler.step(f1)
+            print(f"Epoch {epoch}:")
+            print(f"training acc: {epoch_acc}, training f1:{epoch_f1}, train recall: {trecall}, training precision: {tprecision}, train_bal_acc: {t_bal_acc}")
+            print(f"validation acc: {accuracy} validation f1: {f1},  val preciison: {precision}, val recall:{recall} , val bal_acc: {bal_acc}")
 
             if f1 > best_f1: 
                 run_name = f'{self.config["model"]["name"]}_{self.config["model"]["optimizer"]}_lr_{self.config["model"]["lr"]}_epoch_{self.config["model"]["epochs"]}_{self.config["model"]["identifier"]}'
