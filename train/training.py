@@ -73,7 +73,9 @@ class Classification:
     
     def setup_loss_fnc(self):
         loss = self.config["model"]["loss"]
-        loss_weight = torch.tensor([1.0, 7.0], dtype=torch.float, device='cuda')
+        class_weight = self.config["model"]["class_weight"]
+        loss_weight = torch.tensor([1.0, class_weight], dtype=torch.float, device='cuda')
+
         
         if loss == "BCEWithLogitsLoss":
             self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight = loss_weight[1])
