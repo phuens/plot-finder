@@ -1,10 +1,29 @@
 import torch 
 from torchvision import transforms
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, WeightedRandomSampler
 import random
 import pandas as pd 
 import os 
 from PIL import Image
+import math
+import numpy as np
+
+def position_embedding(max_length:int, embed_size:int):
+    pos_enc = torch.zeros(max_length, embed_size)
+
+    # Compute the position encodings
+    positions = torch.arange(0, max_length, dtype=torch.float32).unsqueeze(1)
+    divisors = torch.exp(torch.arange(0, embed_size, 2, dtype=torch.float32) * -(math.log(10000.0) / embed_size))
+    pos_enc[:, 0::2] = torch.sin(positions * divisors)
+    pos_enc[:, 1::2] = torch.cos(positions * divisors)
+
+    # Add the position embeddings to the input embeddings
+    # input_embeddings = ... # Your input embeddings tensor
+    # pos_embeddings = pos_enc.unsqueeze(0).repeat(input_embeddings.shape[0], 1, 1)
+    # output_embeddings = input_embeddings + pos_embeddings
+
+    return pos_enc
+
 
 
 class Getdata(torch.utils.data.Dataset):
@@ -12,6 +31,8 @@ class Getdata(torch.utils.data.Dataset):
         self.data = pd.read_csv(csv_file)
         self.transform = transform
         self.root_img_dir = root_img_dir
+        self.position_embed = position_embedding(max_length=1000, embed_size=2048)
+
     
     
     def __len__(self): 
@@ -29,8 +50,9 @@ class Getdata(torch.utils.data.Dataset):
         label = self.data.loc[idx][6]
         position    = self.data.loc[idx][7]
         img_name = self.data.loc[idx][5] 
+        pos_embed = self.position_embed[position]
 
-        return image, label, position, img_name
+        return image, label, pos_embed, img_name
 
 
 
@@ -84,14 +106,23 @@ class PrepareDataset:
             else: 
                 train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 
-                # train_size = int(self.config["model"]["train_size"] * len(train_dataset))
-                # val_size = int(len(train_dataset) - train_size)
-                # train_data, val_data = random_split(train_dataset, [train_size, val_size])
+                # WEIGHTED SAMPLER
+                class_labels = []
+                for i in range(len(train_dataset)):
+                    _, label, _, _=  train_dataset[i]
+                    class_labels.append(label)
+                class_labels = np.array(class_labels)
+
+                class_sample_count = np.array([len(class_labels)-class_labels.sum(), class_labels.sum()])
+                weight = 1. / class_sample_count
+                samples_weight = np.array([weight[t] for t in class_labels])
+                samples_weight = torch.from_numpy(samples_weight)
                 
-                # Define the dataloaders with the samplers
-                train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
+                weighted_sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
+                
+                train_loader = DataLoader(train_dataset, sampler = weighted_sampler, batch_size=self.config["model"]["batch"], num_workers=4)
                 
                 return train_loader
-
+0
 
                

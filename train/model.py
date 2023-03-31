@@ -26,6 +26,4 @@ def get_model(model, classes, pretrained=True):
             torch.nn.Flatten(start_dim=1, end_dim=-1),
             torch.nn.Linear(in_features=1024, out_features=classes, bias=True)
         )
-
-
     return model_ft

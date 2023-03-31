@@ -17,6 +17,7 @@ class Predict(Classification):
         self.test_data = get_data.prepare_dataset(category='validation')
 
         model_path = os.path.join(self.config["test"]["model_path"], self.config["test"]["name"])
+        print(f'Using the model {self.config["test"]["name"]}')
         self.model.load_state_dict(torch.load(model_path))
 
     def predict(self): 
@@ -26,10 +27,10 @@ class Predict(Classification):
         predicted, target, image_name = [],[],[]
 
         with torch.no_grad(): 
-            for (images, label, _, img_name) in tqdm(self.test_data): 
+            for (images, label, pos, img_name) in tqdm(self.test_data): 
                 images = images.to(self.device)
                 label = label.to(self.device)
-                outputs = self.model(images)
+                outputs = self.model(images, pos)
                 
                 _, preds = torch.max(outputs, 1)
 
