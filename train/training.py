@@ -201,8 +201,8 @@ class Classification:
                 images = self.concat_coord(images)
                 images = images.to(self.device)
                 labels = labels.to(self.device)
-                pos_embed = pos_embed.unsqueeze(-1).unsqueeze(-1)
-                pos_embed = pos_embed.to(self.device)
+                #pos_embed = pos_embed.unsqueeze(-1).unsqueeze(-1)
+                #pos_embed = pos_embed.to(self.device)
 
                 outputs = self.model(images)
                 if train and self.config["model"]["name"] == "inception_v3": 
@@ -295,14 +295,24 @@ def load_config(config_name):
 
 
 def run(): 
-    config = load_config("config.yml")
-    identifier = random.randint(0, 10000000)
-    config["model"]["identifier"] = identifier
-    torch.manual_seed(config["model"]["seed"])
-    classifier = Classification(config)
-    
+    seasons = [('train_early_vigor.csv', 'validation_early_vigor.csv'), ('train_before_canopy.csv', 'validation_before_canopy.csv'), ('train_canopy_closure.csv', 'validation_canopy_closure.csv'), ('train_flowering.csv', 'validation_flowering.csv')]
 
-    with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
-        classifier.train()
+    for season in seasons: 
+        config = load_config("config.yml")
 
+        identifier = random.randint(0, 10000000)
+        config["model"]["identifier"] = identifier
+        
+        train_csv = season[0]
+        validation_csv = season[1]
+        config["dataset"]["train_csv"] = "dataset/"+train_csv
+        config["dataset"]["validation_csv"] = "dataset/"+validation_csv
+        config["model"]["change"] = ''.join(train_csv.split('_')[1:])
+
+        torch.manual_seed(config["model"]["seed"])
+        
+        classifier = Classification(config)
+
+        with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
+            classifier.train()
 
