@@ -9,7 +9,7 @@ def get_model(model, classes, pretrained=True):
         model_ft.fc = torch.nn.Sequential(torch.nn.Linear(model_ft.fc.in_features, classes))
     
     elif model == 'resnet50':
-        model_ft = models.resnet50(pretrained=pretrained)
+        model_ft = models.resnet50(pretrained=False)
         model_ft.fc = torch.nn.Sequential(torch.nn.Linear(model_ft.fc.in_features, classes))
 
     elif model == "inception_v3": 

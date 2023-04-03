@@ -139,9 +139,10 @@ class Classification:
     
 
     def create_coord(self): 
-        batch   = self.config["model"["batch"]]
+        batch   = self.config["model"]["batch"]
         width   = self.config["augmentation"]["width"]
         height  = self.config["augmentation"]["height"]
+
 
         xx_ones     = torch.ones([batch, width], dtype=torch.int64) # (batch x width)
         xx_ones     = xx_ones.unsqueeze(-1)
@@ -149,15 +150,16 @@ class Classification:
         xx_range    = xx_range.unsqueeze(1) # (batch x 1 x height)
         
 
-        xx_channel  = torch.matmul(xx_ones, xx_range)
+        xx_channel  = torch.matmul(xx_ones.float(), xx_range.float())
         xx_channel  = xx_channel.unsqueeze(-1)
         
         yy_ones     = torch.ones([batch, height], dtype=torch.int64)
-        yy_ones     = yy_ones.unsqueeze(-1)
+        yy_ones     = yy_ones.unsqueeze(1)
+
         yy_range    = torch.arange(width).unsqueeze(0).repeat(batch, 1)
         yy_range    = yy_range.unsqueeze(-1)
 
-        yy_channel  = torch.matmul(yy_ones, yy_range)
+        yy_channel  = torch.matmul(yy_range.float(), yy_ones.float())
         yy_channel  = yy_channel.unsqueeze(-1)
         
         xx_channel  = xx_channel.float() / (width - 1)
@@ -168,7 +170,13 @@ class Classification:
         self.xx_channel = xx_channel
         self.yy_channel = yy_channel
 
-    
+
+    def concat_coord(self, images):
+        images = images.permute(0, 2, 3, 1)
+        images =  torch.cat([images, self.xx_channel, self.yy_channel], dim=-1)
+        images = images.permute(0, 3, 1, 2)
+        
+        return images
 
     def one_epoch(self, train=True, epoch=0): 
         if train: 
@@ -187,6 +195,7 @@ class Classification:
                 #    self.display_image(images, labels, img_name)
                 #    self.displayed = True
 
+                images = self.concat_coord(images)
                 images = images.to(self.device)
                 labels = labels.to(self.device)
 
@@ -238,7 +247,7 @@ class Classification:
         self.setup_optimizer()
         self.setup_scheduler()
         self.count_parameters()
-        
+        self.create_coord()
         
         # GET DATASET
         data = PrepareDataset(self.config)
