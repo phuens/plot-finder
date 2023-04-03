@@ -204,7 +204,7 @@ class Classification:
                 pos_embed = pos_embed.unsqueeze(-1).unsqueeze(-1)
                 pos_embed = pos_embed.to(self.device)
 
-                outputs = self.model(images, pos_embed)
+                outputs = self.model(images)
                 if train and self.config["model"]["name"] == "inception_v3": 
                     outputs = outputs[0]
 
