@@ -282,9 +282,9 @@ class Classification:
             print(f"validation acc: {accuracy} validation f1: {f1},  val preciison: {precision}, val recall:{recall} , val bal_acc: {bal_acc}")
 
             if f1 > best_f1: 
-                run_name = f'{self.config["model"]["name"]}_{self.config["model"]["optimizer"]}_lr_{self.config["model"]["lr"]}_epoch_{self.config["model"]["epochs"]}_{self.config["model"]["identifier"]}'
-
+                run_name = str(self.config["model"]["identifier"])
                 self.save_model(model_wts, run_name)
+                
         print(f"Best f1 score: {best_f1}")
 
 
@@ -296,12 +296,13 @@ def load_config(config_name):
 
 def run(): 
     config = load_config("config.yml")
-    config["model"]["identifier"] = random.randint(0, 10000000)
+    identifier = random.randint(0, 10000000)
+    config["model"]["identifier"] = identifier
     torch.manual_seed(config["model"]["seed"])
     classifier = Classification(config)
     
 
-    with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():
+    with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 
 
