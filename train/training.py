@@ -138,8 +138,7 @@ class Classification:
         plt.show()       
     
 
-    def create_coord(self): 
-        batch   = self.config["model"]["batch"]
+    def create_coord(self, batch): 
         width   = self.config["augmentation"]["width"]
         height  = self.config["augmentation"]["height"]
 
@@ -167,13 +166,14 @@ class Classification:
         xx_channel  = xx_channel*2 - 1
         yy_channel  = yy_channel*2 - 1 
 
-        self.xx_channel = xx_channel
-        self.yy_channel = yy_channel
+        return xx_channel, yy_channel
 
 
     def concat_coord(self, images):
         images = images.permute(0, 2, 3, 1)
-        images =  torch.cat([images, self.xx_channel, self.yy_channel], dim=-1)
+
+        xx, yy = self.create_coord(batch=len(images))
+        images =  torch.cat([images, xx, yy], dim=-1)
         images = images.permute(0, 3, 1, 2)
         
         return images
@@ -251,7 +251,6 @@ class Classification:
         self.setup_optimizer()
         self.setup_scheduler()
         self.count_parameters()
-        self.create_coord()
         
         # GET DATASET
         data = PrepareDataset(self.config)
@@ -284,7 +283,7 @@ class Classification:
             if f1 > best_f1: 
                 run_name = str(self.config["model"]["identifier"])
                 self.save_model(model_wts, run_name)
-                
+
         print(f"Best f1 score: {best_f1}")
 
 
