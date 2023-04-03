@@ -188,18 +188,23 @@ class Classification:
             pbar = progress_bar(self.val_loader, leave=False)
 
         predicted, targets = [], [] 
-        for _, (images, labels, position, img_name) in enumerate(pbar): 
+        for _, (images, labels, pos_embed, img_name) in enumerate(pbar): 
             with torch.autocast("cuda") and (torch.inference_mode() if not train else torch.enable_grad()): 
                 
                 #if not self.displayed: 
                 #    self.display_image(images, labels, img_name)
                 #    self.displayed = True
+                # print(pos_embed.shape)
+                # print(images.shape)
+
 
                 images = self.concat_coord(images)
                 images = images.to(self.device)
                 labels = labels.to(self.device)
+                pos_embed = pos_embed.unsqueeze(-1).unsqueeze(-1)
+                pos_embed = pos_embed.to(self.device)
 
-                outputs = self.model(images)
+                outputs = self.model(images, pos_embed)
                 if train and self.config["model"]["name"] == "inception_v3": 
                     outputs = outputs[0]
 
@@ -212,7 +217,6 @@ class Classification:
                 loss = self.criterion(outputs, one_hot_targets.float())
                 
                 if train:
-                    #if self.config["model"]["scheduler"] == "cycliclr_triangle":
                     loss.backward()
                     self.optimizer.step()
                     self.scheduler.step()
@@ -293,8 +297,10 @@ def load_config(config_name):
 def run(): 
     config = load_config("config.yml")
     config["model"]["identifier"] = random.randint(0, 10000000)
+    torch.manual_seed(config["model"]["seed"])
     classifier = Classification(config)
- 
+    
+
     with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 
