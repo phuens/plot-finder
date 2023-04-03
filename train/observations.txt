@@ -1,0 +1,3 @@
+
+1. Postion embedding seems to have no effect on the model's performance.
+    We use sine consine to construct position embedding which we then use to concatenate to the second last layer of the model before it is flattened. 
