@@ -137,6 +137,39 @@ class Classification:
 
         plt.show()       
     
+
+    def create_coord(self): 
+        batch   = self.config["model"["batch"]]
+        width   = self.config["augmentation"]["width"]
+        height  = self.config["augmentation"]["height"]
+
+        xx_ones     = torch.ones([batch, width], dtype=torch.int64) # (batch x width)
+        xx_ones     = xx_ones.unsqueeze(-1)
+        xx_range    = torch.arange(height).unsqueeze(0).repeat(batch, 1) 
+        xx_range    = xx_range.unsqueeze(1) # (batch x 1 x height)
+        
+
+        xx_channel  = torch.matmul(xx_ones, xx_range)
+        xx_channel  = xx_channel.unsqueeze(-1)
+        
+        yy_ones     = torch.ones([batch, height], dtype=torch.int64)
+        yy_ones     = yy_ones.unsqueeze(-1)
+        yy_range    = torch.arange(width).unsqueeze(0).repeat(batch, 1)
+        yy_range    = yy_range.unsqueeze(-1)
+
+        yy_channel  = torch.matmul(yy_ones, yy_range)
+        yy_channel  = yy_channel.unsqueeze(-1)
+        
+        xx_channel  = xx_channel.float() / (width - 1)
+        yy_channel  = yy_channel.float() / (height - 1)
+        xx_channel  = xx_channel*2 - 1
+        yy_channel  = yy_channel*2 - 1 
+
+        self.xx_channel = xx_channel
+        self.yy_channel = yy_channel
+
+    
+
     def one_epoch(self, train=True, epoch=0): 
         if train: 
             self.model.train()
