@@ -109,7 +109,7 @@ class Classification:
         elif schedule == "cosine_onecyclelr": 
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, 
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
-                steps_per_epoch = 8, # The number of steps per epoch to train for.
+                steps_per_epoch = 1269, # The number of steps per epoch to train for.
                 epochs = self.config["model"]["epochs"], # The number of epochs to train for.
                 anneal_strategy = 'cos') # Specifies the annealing strategy
 
