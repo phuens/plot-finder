@@ -19,6 +19,7 @@ from train.dataset import PrepareDataset
 
 class Classification: 
     def __init__(self, config: object) -> None:
+        torch.manual_seed(config["model"]["seed"])
         self.config = config 
         self.model = get_model(self.config["model"]["name"], self.config["model"]["classes"])
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -297,7 +298,6 @@ def run():
     config = load_config("config.yml")
     identifier = random.randint(0, 10000000)
     config["model"]["identifier"] = identifier
-    torch.manual_seed(config["model"]["seed"])
     classifier = Classification(config)
     
 
