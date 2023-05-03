@@ -19,7 +19,7 @@ def get_model(model, classes, pretrained=True):
     elif model == "convnext": 
         model_ft = models.convnext_base(weights='DEFAULT')
         model_ft.classifier = torch.nn.Sequential(
-            torch.nn.LayerNorm((1024,), eps=1e-06, elementwise_affine=True),
+            # torch.nn.LayerNorm((16, 1024, 1, 1), eps=1e-06, elementwise_affine=True),
             torch.nn.Flatten(start_dim=1, end_dim=-1),
             torch.nn.Linear(in_features=1024, out_features=classes, bias=True)
         )

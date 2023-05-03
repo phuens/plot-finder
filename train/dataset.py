@@ -45,12 +45,12 @@ class Getdata(torch.utils.data.Dataset):
         image_name  = self.data.loc[idx][5]
         img_path    = os.path.join(self.root_img_dir, path, image_name)
 
-        image = Image.open(img_path)
-        image = image.convert('HSV')
-        image = self.transform(image)
-        label = self.data.loc[idx][6]
-        score = self.data.loc[idx][-1]
-        position    = self.data.loc[idx][7]
+        image    = Image.open(img_path)
+        image    = image.convert('HSV')
+        image    = self.transform(image)
+        label    = self.data.loc[idx][6]
+        score    = self.data.loc[idx][-1]
+        position = self.data.loc[idx][7]
         img_name = self.data.loc[idx][5] 
         # pos_embed = self.position_embed[position]
 
@@ -111,7 +111,7 @@ class PrepareDataset:
                 # WEIGHTED SAMPLER
                 class_labels = []
                 for i in range(len(train_dataset)):
-                    _, label, _, _=  train_dataset[i]
+                    _, label, _, _, _=  train_dataset[i]
                     class_labels.append(label)
                 class_labels = np.array(class_labels)
 

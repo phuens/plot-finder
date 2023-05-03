@@ -189,7 +189,7 @@ class Classification:
             pbar = progress_bar(self.val_loader, leave=False)
 
         predicted, targets = [], [] 
-        for _, (images, labels, pos_embed, img_name) in enumerate(pbar): 
+        for _, (images, labels, score, position, img_name) in enumerate(pbar): 
             with torch.autocast("cuda") and (torch.inference_mode() if not train else torch.enable_grad()): 
                 
                 #if not self.displayed: 
