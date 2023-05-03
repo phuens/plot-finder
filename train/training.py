@@ -19,10 +19,11 @@ from train.dataset import PrepareDataset
 
 class Classification: 
     def __init__(self, config: object) -> None:
+        torch.manual_seed(config["model"]["seed"])
         self.config = config 
         self.model = get_model(self.config["model"]["name"], self.config["model"]["classes"])
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        print(f"Device: {self.device}")
+        # print(f"Device: {self.device}")
 
 
     def setup_logging(self): 
@@ -198,7 +199,7 @@ class Classification:
                 # print(images.shape)
 
 
-                images = self.concat_coord(images)
+                # images = self.concat_coord(images)
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 #pos_embed = pos_embed.unsqueeze(-1).unsqueeze(-1)
@@ -294,24 +295,14 @@ def load_config(config_name):
 
 
 def run(): 
-    seasons = [('train_early_vigor.csv', 'validation_early_vigor.csv'), ('train_before_canopy.csv', 'validation_before_canopy.csv'), ('train_canopy_closure.csv', 'validation_canopy_closure.csv'), ('train_flowering.csv', 'validation_flowering.csv')]
 
-    for season in seasons: 
-        config = load_config("config.yml")
+    config = load_config("config.yml")
+    identifier = random.randint(0, 10000000)
+    config["model"]["identifier"] = identifier
+    classifier = Classification(config)
+    
 
-        identifier = random.randint(0, 10000000)
-        config["model"]["identifier"] = identifier
-        
-        train_csv = season[0]
-        validation_csv = season[1]
-        config["dataset"]["train_csv"] = "dataset/"+train_csv
-        config["dataset"]["validation_csv"] = "dataset/"+validation_csv
-        config["model"]["change"] = ''.join(train_csv.split('_')[1:])
+    with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
+        classifier.train()
 
-        torch.manual_seed(config["model"]["seed"])
-        
-        classifier = Classification(config)
-
-        with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
-            classifier.train()
 

@@ -24,16 +24,17 @@ class Predict(Classification):
         self.model.to(self.device)
         self.model.eval()
 
-        predicted, target, image_name = [],[],[]
+        probability, predicted, target, image_name = [], [], [], []
 
         with torch.no_grad(): 
             for (images, label, pos, img_name) in tqdm(self.test_data): 
                 images = images.to(self.device)
                 label = label.to(self.device)
                 outputs = self.model(images, pos)
+
+                probability.append(outputs.cpu().numpy())
                 
                 _, preds = torch.max(outputs, 1)
-
                 predicted.append(preds.cpu().numpy())
                 target.append(label.cpu().numpy())
                 image_name.append(img_name)
@@ -43,12 +44,12 @@ class Predict(Classification):
         
         print(f"Acc: {accuracy} f1:{f1}, precision: {precision}, recall: {recall}, bal_acc: {bal_acc}")
 
-       
+        probability = np.concatenate(probability)
         predicted = np.concatenate(predicted)
         target = np.concatenate(target)
         image_name = np.concatenate(image_name)
 
-        df = pd.DataFrame(list(zip(image_name, predicted, target)), columns=['name', 'predicted', 'target'])
+        df = pd.DataFrame(list(zip(image_name, probability, predicted, target)), columns=['name', 'probability', 'predicted', 'target'])
 
         csv_name = self.config["test"]["name"]
         csv_name = csv_name.replace('.pt', '.csv')
@@ -64,6 +65,7 @@ def load_config(config_name):
     return config
 
 def run(): 
+
     config = load_config("config.yml")
     model = Predict(config)
     model.setup_testing()
