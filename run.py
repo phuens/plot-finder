@@ -1,14 +1,14 @@
 from train import training
-from predict import predict
+from predict import predict, extract_feature
 import sys
 
 
 if __name__ == '__main__':
-    print(sys.argv[1])
-    test = False if sys.argv[1] == 'train' else True
-    
-    if not test:
+    if sys.argv[1] == 'train':
         training.run()
-    else: 
+    
+    elif sys.argv[1] == 'test':
         predict.run()
 
+    else:
+        extract_feature.run()

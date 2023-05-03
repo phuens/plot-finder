@@ -23,7 +23,7 @@ class Classification:
         self.config = config 
         self.model = get_model(self.config["model"]["name"], self.config["model"]["classes"])
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        print(f"Device: {self.device}")
+        # print(f"Device: {self.device}")
 
 
     def setup_logging(self): 
@@ -199,7 +199,7 @@ class Classification:
                 # print(images.shape)
 
 
-                images = self.concat_coord(images)
+                # images = self.concat_coord(images)
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 pos_embed = pos_embed.unsqueeze(-1).unsqueeze(-1)

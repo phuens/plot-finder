@@ -15,9 +15,6 @@ def get_model(model, classes, pretrained=True):
     elif model == "inception_v3": 
         model_ft = models.inception_v3(pretrained=True)
         model_ft.fc = torch.nn.Sequential(torch.nn.Linear(model_ft.fc.in_features, classes))
-
-    elif model == "swin_transfomer": 
-        model_ft = models.swin_b(weights="DEFAULT")
     
     elif model == "convnext": 
         model_ft = models.convnext_base(weights='DEFAULT')

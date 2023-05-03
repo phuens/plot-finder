@@ -11,6 +11,9 @@ config.yml
 *wandb/
 *models/
 *dataset/images
+
+predict/*extratced_feature/
+
 # Distribution / packaging
 .Python
 build/
