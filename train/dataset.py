@@ -40,23 +40,23 @@ class Getdata(torch.utils.data.Dataset):
     
 
     def __getitem__(self, idx):
-
-        path    = self.data.loc[idx][-2]
+        
         image_name  = self.data.loc[idx][5]
+        label       = self.data.loc[idx][6]
+        position    = self.data.loc[idx][7]
+        path        = self.data.loc[idx][8]
         img_path    = os.path.join(self.root_img_dir, path, image_name)
 
-        image    = Image.open(img_path)
-        image    = image.convert('HSV')
-        image    = self.transform(image)
-        label    = self.data.loc[idx][6]
-        score    = self.data.loc[idx][-1]
-        position = self.data.loc[idx][7]
-        img_name = self.data.loc[idx][5] 
+        image = Image.open(img_path)
+        image = image.convert('HSV')
+        image = self.transform(image)
+        
+        # score    = self.data.loc[idx][-1]
         # pos_embed = self.position_embed[position]
+        score = 1 
 
-        return image, label, score, position, img_name
-
-
+        return image, label, score, position, image_name
+    
 
 class PrepareDataset: 
     def __init__(self, config:object) -> None:

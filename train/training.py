@@ -89,7 +89,7 @@ class Classification:
             self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, 
                 base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
-                step_size_up = 500, # Number of training iterations in the increasing half of a cycle
+                step_size_up = (40597 // self.config["model"]["batch"])//2, # Number of training iterations in the increasing half of a cycle
                 cycle_momentum = False,
                 mode = "exp_range")
 
@@ -98,7 +98,7 @@ class Classification:
                 base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
                 cycle_momentum = False,
-                step_size_up = 500, # Number of training iterations in the increasing half of a cycle
+                step_size_up = (40597 // self.config["model"]["batch"])//2, # Number of training iterations in the increasing half of a cycle
                 mode = "triangular")
             
         elif schedule == "cosineannealing": 
@@ -109,11 +109,11 @@ class Classification:
         
         elif schedule == "cosine_onecyclelr": 
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, 
-                max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
-                steps_per_epoch = 1269, # The number of steps per epoch to train for.
-                epochs = self.config["model"]["epochs"], # The number of epochs to train for.
-                anneal_strategy = 'cos') # Specifies the annealing strategy
-
+                max_lr = 1e-3,
+                steps_per_epoch = 40597 // self.config["model"]["batch"], 
+                epochs = self.config["model"]["epochs"],
+                anneal_strategy = 'cos') 
+            
         else: 
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 self.optimizer, 
@@ -222,7 +222,7 @@ class Classification:
                     self.optimizer.step()
                     self.scheduler.step()
                     if self.config['wandb']['use']:
-                        wandb.log({"learning rate:":self.scheduler.get_last_lr()[0],"epoch":epoch})
+                        wandb.log({"learning rate:":self.scheduler.get_last_lr()[0]})
                     self.optimizer.zero_grad()
 
                 pbar.comment = f"loss={loss.item():2.3f}"
@@ -285,6 +285,7 @@ class Classification:
                 run_name = str(self.config["model"]["identifier"])
                 self.save_model(model_wts, run_name)
 
+        wandb.log({f"max_f1": best_f1})
         print(f"Best f1 score: {best_f1}")
 
 
