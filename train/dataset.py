@@ -40,7 +40,6 @@ class Getdata(torch.utils.data.Dataset):
     
 
     def __getitem__(self, idx):
-        
         image_name  = self.data.loc[idx][5]
         label       = self.data.loc[idx][6]
         position    = self.data.loc[idx][7]

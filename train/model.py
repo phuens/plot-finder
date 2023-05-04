@@ -23,6 +23,13 @@ def get_model(model, classes, pretrained=True):
             torch.nn.Flatten(start_dim=1, end_dim=-1),
             torch.nn.Linear(in_features=1024, out_features=classes, bias=True)
         )
+    
+    elif model == "vit": 
+        model_ft    = models.vit_b_32()
+        in_feature  = model_ft.heads.head.in_features
+        model_ft.heads = torch.nn.Sequential(
+            torch.nn.Linear(in_feature, classes)
+        )
 
 
     return model_ft
