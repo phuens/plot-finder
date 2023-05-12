@@ -50,10 +50,9 @@ class Getdata(torch.utils.data.Dataset):
         image = image.convert('HSV')
         image = self.transform(image)
         
-        # score    = self.data.loc[idx][-1]
+        score    = self.data.loc[idx][-1]
         # pos_embed = self.position_embed[position]
-        score = 1 
-
+        
         return image, label, score, position, image_name
     
 
@@ -67,7 +66,7 @@ class PrepareDataset:
 
         transform = {
             "training": transforms.Compose([
-                transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])),
+                transforms.CenterCrop((self.config["augmentation"]["width"], self.config["augmentation"]["height"])),
                 transforms.RandomHorizontalFlip(p=self.config["augmentation"]["horizontal_flip"]),
                 transforms.RandomVerticalFlip(p=self.config["augmentation"]["vertical_flip"]),
                 transforms.RandomRotation(random.randint(0, self.config["augmentation"]["rotation"])),
@@ -77,7 +76,8 @@ class PrepareDataset:
             ]),
 
             "validation": transforms.Compose([
-                transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
+                transforms.Resize((1000)),
+                transforms.CenterCrop((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
                 transforms.ToTensor(),
                 # transforms.Normalize([0.4, 0.4, 0.4], [0.3,0.3,0.3])
             ])
@@ -123,6 +123,9 @@ class PrepareDataset:
                 
                 train_loader = DataLoader(train_dataset, sampler = weighted_sampler, batch_size=self.config["model"]["batch"], num_workers=4)
                 
+
+                # train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
+
                 return train_loader
 0
 

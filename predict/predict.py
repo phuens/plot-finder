@@ -11,6 +11,7 @@ from train.dataset import PrepareDataset
 class Predict(Classification): 
     def __init__(self, config: object) -> None:
         super().__init__(config)
+        
 
     def setup_testing(self): 
         get_data =  PrepareDataset(self.config)
@@ -26,11 +27,12 @@ class Predict(Classification):
 
         probability, predicted, target, image_name = [], [], [], []
 
+
         with torch.no_grad(): 
-            for (images, label, pos, img_name) in tqdm(self.test_data): 
+            for (images, label, score, pos, img_name) in tqdm(self.test_data): 
                 images = images.to(self.device)
                 label = label.to(self.device)
-                outputs = self.model(images, pos)
+                outputs = self.model(images)
 
                 probability.append(outputs.cpu().numpy())
                 
@@ -42,20 +44,25 @@ class Predict(Classification):
 
         accuracy, f1, precision, recall, bal_acc = self.calculate_metrics(predicted=predicted, targets=target)
         
-        print(f"Acc: {accuracy} f1:{f1}, precision: {precision}, recall: {recall}, bal_acc: {bal_acc}")
+        # print(f"f1:{f1}, precision: {precision}, recall: {recall}, bal_acc: {bal_acc} Acc: {accuracy} ")
+        print(self.config["dataset"]["validation_csv"])
+        print(f"{round(f1, 5)} {round(precision, 5)} {round(recall, 5)} {round(bal_acc, 5)} {round(accuracy, 5)} ")
+        print("\n")
+        return accuracy, f1, precision, recall, bal_acc
+        
 
         probability = np.concatenate(probability)
         predicted = np.concatenate(predicted)
         target = np.concatenate(target)
         image_name = np.concatenate(image_name)
 
-        df = pd.DataFrame(list(zip(image_name, probability, predicted, target)), columns=['name', 'probability', 'predicted', 'target'])
+        # df = pd.DataFrame(list(zip(image_name, probability, predicted, target)), columns=['name', 'probability', 'predicted', 'target'])
 
-        csv_name = self.config["test"]["name"]
-        csv_name = csv_name.replace('.pt', '.csv')
+        # csv_name = self.config["test"]["name"]
+        # csv_name = csv_name.replace('.pt', '.csv')
 
 
-        df.to_csv('predict/result/'+csv_name, index=False)
+        # df.to_csv('predict/result/'+csv_name, index=False)
 
 
 
@@ -65,8 +72,27 @@ def load_config(config_name):
     return config
 
 def run(): 
-
     config = load_config("config.yml")
-    model = Predict(config)
-    model.setup_testing()
-    model.predict()
+
+    metric_score = pd.DataFrame(columns=["video", "accuracy", "f1", "precision", "recall", "bal_acc"])
+    for files in os.listdir("/home/phuntsho/Desktop/plot-finder/plot-finder/dataset/validation_range_wise"): 
+        if files.endswith(".csv"):
+            config['dataset']['test_csv'] = config['dataset']['validation_csv'] = str("dataset/validation_range_wise/"+files)
+            model = Predict(config)
+            model.setup_testing()
+            accuracy, f1, precision, recall , bal_acc = model.predict()
+            
+            metric_score = metric_score.append({
+                "accuracy"  : accuracy, 
+                "f1"        : f1, 
+                "precision" : precision, 
+                "recall"    : recall, 
+                "bal_acc"   : bal_acc
+            }, ignore_index = True)
+    
+    print("\n\nMEAN SCORES")
+    print(f"ACC:    {metric_score['accuracy'].mean()}")
+    print(f"F1:     {metric_score['f1'].mean()}")
+    print(f"PREC:   {metric_score['precision'].mean()}")
+    print(f"RECALL: {metric_score['recall'].mean()}")
+    print(f"BAL_ACC:{metric_score['bal_acc'].mean()}")

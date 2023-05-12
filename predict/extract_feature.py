@@ -72,9 +72,22 @@ class Predict(Classification):
         target      = np.concatenate(target).astype(int)
         image_name  = np.concatenate(image_name).astype(str)
         features    = np.array(self.return_features_as_1D())
-
+        self.calc_metrics(target, predicted)
         return position, gtscore, target, image_name, features
 
+
+    def calc_metrics(self, targets, predicted):
+        predicted = np.concatenate(predicted)
+        #targets = np.concatenate(targets)
+
+        accuracy = (predicted == targets).sum() / len(predicted)
+
+        f1 = metrics.f1_score(targets, predicted)
+        precision = metrics.precision_score(targets, predicted)
+        recall = metrics.recall_score(targets, predicted)
+        bal_acc = metrics.balanced_accuracy_score(targets, predicted)
+        print(f1, precision, recall, bal_acc)
+        return accuracy, f1, precision, recall, bal_acc
             
 def load_config(config_name):
     with open(config_name) as file:
@@ -83,12 +96,12 @@ def load_config(config_name):
 
 def run(): 
     config  = load_config("config.yml")
-    h5_file = h5py.File('hsv_validation_2048_feature.h5', 'w')
+    h5_file = h5py.File('hsv_train_emergence_feature.h5', 'w')
     videos  = [] 
 
-    for file in os.listdir('/home/phuntsho/Desktop/plot-finder/raw_data/single_video/score_data/validation'):
+    for file in os.listdir('/home/phuntsho/Desktop/plot-finder/raw_data/single_video/score_data/train'):
         if file.endswith('.csv'):
-            config['dataset']['validation_csv'] = "/home/phuntsho/Desktop/plot-finder/raw_data/single_video/score_data/validation/"+str(file)
+            config['dataset']['validation_csv'] = "/home/phuntsho/Desktop/plot-finder/raw_data/single_video/score_data/train/"+str(file)
 
             print("\n", config['dataset']['validation_csv'])
 

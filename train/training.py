@@ -23,7 +23,7 @@ class Classification:
         self.config = config 
         self.model = get_model(self.config["model"]["name"], self.config["model"]["classes"])
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        # print(f"Device: {self.device}")
+        print(f'Model: {self.config["model"]["name"]}')
 
 
     def setup_logging(self): 
@@ -127,9 +127,9 @@ class Classification:
                 verbose=True)
 
     def display_image(self, images, labels, image_name): 
-        plt.figure(figsize=(10, 10))
-        for i in range(16):
-            ax = plt.subplot(4, 4, i + 1)
+        plt.figure(figsize=(20, 20))
+        for i in range(len(images)):
+            ax = plt.subplot(3, 2, i + 1)
             img = images[i]
             img = img.permute(2, 1, 0)
             plt.imshow(img.numpy())
@@ -192,10 +192,9 @@ class Classification:
         for _, (images, labels, score, position, img_name) in enumerate(pbar): 
             with torch.autocast("cuda") and (torch.inference_mode() if not train else torch.enable_grad()): 
                 
-                #if not self.displayed: 
+                # if not self.displayed: 
                 #    self.display_image(images, labels, img_name)
                 #    self.displayed = True
-                # print(pos_embed.shape)
                 # print(images.shape)
 
 
@@ -282,6 +281,7 @@ class Classification:
             print(f"validation acc: {accuracy} validation f1: {f1},  val preciison: {precision}, val recall:{recall} , val bal_acc: {bal_acc}")
 
             if f1 > best_f1: 
+                best_f1 = f1
                 run_name = str(self.config["model"]["identifier"])
                 self.save_model(model_wts, run_name)
 
