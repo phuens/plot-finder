@@ -1,11 +1,15 @@
 import h5py
 import json 
+import numpy as np
 
-hdf = h5py.File('/home/phuntsho/Desktop/plot-finder/plot-finder/2048_feature.h5', 'r')
+hdf = h5py.File('/home/phn501/plot-finder/dataset/features/hsv_training_feature_imagenet.h5', 'r')
 
 
-with open("/home/phuntsho/Desktop/plot-finder/plot-finder/predict/extratced_feature/plotreel_video_names.json") as f:
+with open("/home/phn501/plot-finder/dataset/features/plotreel_video_names.json") as f:
     videos = json.loads(f.read())
 
-for video in videos['test_keys']: 
-    print(video)
+for video_name in videos['train_keys']:
+    frame_features = np.array(hdf[video_name + '/gtscore'])
+
+    # gtscore = torch.Tensor(np.array(hdf[video_name + '/gtscore']))
+    print(frame_features)

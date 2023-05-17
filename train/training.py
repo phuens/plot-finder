@@ -85,11 +85,12 @@ class Classification:
             
     def setup_scheduler(self):
         schedule = self.config["model"]["scheduler"] 
+        T_max = len(self.train_loader)*self.config["model"]["epochs"]
         if schedule == "cycliclr_exp_range": 
             self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, 
                 base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
-                step_size_up = (40597 // self.config["model"]["batch"])//2, # Number of training iterations in the increasing half of a cycle
+                step_size_up = T_max//2, # Number of training iterations in the increasing half of a cycle
                 cycle_momentum = False,
                 mode = "exp_range")
 
@@ -98,7 +99,10 @@ class Classification:
                 base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
                 max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
                 cycle_momentum = False,
-                step_size_up = (40597 // self.config["model"]["batch"])//2, # Number of training iterations in the increasing half of a cycle
+                # **********************
+                # step_size_up = (18608 // self.config["model"]["batch"])//2, # Number of training iterations in the 
+                # *****************increasing half of a cycle
+                step_size_up = T_max//2, 
                 mode = "triangular")
             
         elif schedule == "cosineannealing": 
@@ -109,8 +113,8 @@ class Classification:
         
         elif schedule == "cosine_onecyclelr": 
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, 
-                max_lr = 1e-3,
-                steps_per_epoch = 40597 // self.config["model"]["batch"], 
+                max_lr = 1e-2,
+                steps_per_epoch = T_max//2, 
                 epochs = self.config["model"]["epochs"],
                 anneal_strategy = 'cos') 
             
@@ -247,16 +251,20 @@ class Classification:
 
     def train(self): 
         self.setup_logging()
+
+        data = PrepareDataset(self.config)
+        self.train_loader = data.prepare_dataset(category = "train")
+        self.val_loader = data.prepare_dataset(category = "validation")
+        self.displayed = False
+
+
         self.setup_loss_fnc()
         self.setup_optimizer()
         self.setup_scheduler()
         self.count_parameters()
         
         # GET DATASET
-        data = PrepareDataset(self.config)
-        self.train_loader = data.prepare_dataset(category = "train")
-        self.val_loader = data.prepare_dataset(category = "validation")
-        self.displayed = False
+        
 
         print(f"Train dataset length: {len(self.train_loader.dataset)} \nValidation dataset length: {len(self.val_loader.dataset)}")
 
@@ -303,7 +311,7 @@ def run():
     classifier = Classification(config)
     
 
-    with wandb.init(project="Plot-finder - detect centered plots", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
+    with wandb.init(project="Plot Detection", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 
 

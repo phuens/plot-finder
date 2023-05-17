@@ -8,6 +8,7 @@ from PIL import Image
 import math
 import numpy as np
 
+
 def position_embedding(max_length:int, embed_size:int):
     pos_enc = torch.zeros(max_length, embed_size)
 
@@ -47,12 +48,12 @@ class Getdata(torch.utils.data.Dataset):
         img_path    = os.path.join(self.root_img_dir, path, image_name)
 
         image = Image.open(img_path)
-        image = image.convert('HSV')
+        image = image.convert("HSV")
         image = self.transform(image)
         
         score    = self.data.loc[idx][-1]
         # pos_embed = self.position_embed[position]
-        
+        # score = 1
         return image, label, score, position, image_name
     
 
@@ -60,26 +61,26 @@ class PrepareDataset:
     def __init__(self, config:object) -> None:
         self.config = config
 
-
     def augment(self): 
         """ augment images based on training vs validation """
 
         transform = {
-            "training": transforms.Compose([
-                transforms.CenterCrop((self.config["augmentation"]["width"], self.config["augmentation"]["height"])),
+            "train": transforms.Compose([
+                transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])),
                 transforms.RandomHorizontalFlip(p=self.config["augmentation"]["horizontal_flip"]),
                 transforms.RandomVerticalFlip(p=self.config["augmentation"]["vertical_flip"]),
                 transforms.RandomRotation(random.randint(0, self.config["augmentation"]["rotation"])),
                 transforms.GaussianBlur(5, sigma=(self.config["augmentation"]["gaussian"], 2.0)),
+                transforms.ColorJitter(brightness= 0.5, hue=0.3),
+                transforms.RandomAdjustSharpness(sharpness_factor=2),
                 transforms.ToTensor(),
-                transforms.Normalize([0.47, 0.47, 0.47], [0.3,0.3,0.3])
+                transforms.Normalize([0.4149, 0.1297, 0.4144], [0.2999, 0.1570, 0.2550])
             ]),
 
             "validation": transforms.Compose([
-                transforms.Resize((1000)),
-                transforms.CenterCrop((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
+                transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
                 transforms.ToTensor(),
-                # transforms.Normalize([0.4, 0.4, 0.4], [0.3,0.3,0.3])
+                transforms.Normalize([0.2812, 0.1616, 0.5090], [0.1981, 0.1516, 0.1076])
             ])
         }
 
@@ -105,28 +106,25 @@ class PrepareDataset:
 
 
             else: 
-                train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["train"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 
                 # WEIGHTED SAMPLER
-                class_labels = []
-                for i in range(len(train_dataset)):
-                    _, label, _, _, _=  train_dataset[i]
-                    class_labels.append(label)
-                class_labels = np.array(class_labels)
+                # class_labels = []
+                # for i in range(len(train_dataset)):
+                #     _, label, _, _, _=  train_dataset[i]
+                #     class_labels.append(label)
+                # class_labels = np.array(class_labels)
 
-                class_sample_count = np.array([len(class_labels)-class_labels.sum(), class_labels.sum()])
-                weight = 1. / class_sample_count
-                samples_weight = np.array([weight[t] for t in class_labels])
-                samples_weight = torch.from_numpy(samples_weight)
+                # class_sample_count = np.array([len(class_labels)-class_labels.sum(), class_labels.sum()])
+                # weight = 1. / class_sample_count
+                # samples_weight = np.array([weight[t] for t in class_labels])
+                # samples_weight = torch.from_numpy(samples_weight)
                 
-                weighted_sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
+                # weighted_sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
                 
-                train_loader = DataLoader(train_dataset, sampler = weighted_sampler, batch_size=self.config["model"]["batch"], num_workers=4)
+                # train_loader = DataLoader(train_dataset, sampler = weighted_sampler, batch_size=self.config["model"]["batch"], num_workers=4)
                 
 
-                # train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
+                train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
 
                 return train_loader
-0
-
-               

@@ -11,6 +11,7 @@ config.yml
 *wandb/
 *models/
 *dataset/images
+*dataset/features
 
 predict/*extratced_feature/
 
