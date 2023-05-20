@@ -1,0 +1,25 @@
+program: run.py
+method : bayes
+project: Plot Detection
+metric :
+  name : f1
+  goal : maximize
+
+parameters:
+  optimizer:
+    values  : ["Adam", "SGD"]
+
+  batch:
+    values  : [24, 32, 64, 72]
+
+  scheduler:
+    values  : ["cycliclr_exp_range", "cycliclr_triangle", "cosineannealing", "cosine_onecyclelr"]
+  
+  augment:
+    values  : [True, False]
+   
+  momentum: 
+    values: [0.3, 0.6, 0.9]
+  
+  class_weight: 
+    values: [5.0, 7.0, 10.0]

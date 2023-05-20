@@ -1,14 +1,21 @@
 from train import training
 from predict import predict, extract_feature
-import sys
+from configs import get_config
 
 
 if __name__ == '__main__':
-    if sys.argv[1] == 'train':
-        training.run()
+
+    config      = get_config()
+    identifier  = random.randint(0, 10000000)
+    config["model"]["identifier"] = identifier
+
+    if  config["type"]["work"] == 'train':
+        training.run(config)
     
-    elif sys.argv[1] == 'test':
-        predict.run()
+
+    elif config["type"]["work"] == 'test':
+        predict.run(config)
+
 
     else:
-        extract_feature.run()
+        extract_feature.run(config)

@@ -12,6 +12,7 @@ from datetime import datetime
 from PIL import Image
 import matplotlib.pyplot as plt
 import random
+import math
 
 from train.model import get_model 
 from train.dataset import PrepareDataset
@@ -86,36 +87,35 @@ class Classification:
     def setup_scheduler(self):
         schedule = self.config["model"]["scheduler"] 
         T_max = len(self.train_loader)*self.config["model"]["epochs"]
+
         if schedule == "cycliclr_exp_range": 
             self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, 
-                base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
-                max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
-                step_size_up = T_max//2, # Number of training iterations in the increasing half of a cycle
+                base_lr = 0.00001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
+                max_lr = 1e-2, # Upper learning rate boundaries in the cycle for each parameter group
+                step_size_up = T_max//4, # Number of training iterations in the increasing half of a cycle
                 cycle_momentum = False,
                 mode = "exp_range")
 
         elif schedule == "cycliclr_triangle":
             self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, 
-                base_lr = 0.0001, # Initial learning rate which is the lower boundary in the cycle for each parameter group
-                max_lr = 1e-3, # Upper learning rate boundaries in the cycle for each parameter group
+                base_lr = 0.00001, # Initial learning rate which is the lower boundary in cycle for each parameter group
+                max_lr = 1e-2, # Upper learning rate boundaries in the cycle for each parameter group
                 cycle_momentum = False,
-                # **********************
-                # step_size_up = (18608 // self.config["model"]["batch"])//2, # Number of training iterations in the 
-                # *****************increasing half of a cycle
-                step_size_up = T_max//2, 
+                step_size_up = T_max//4, # Number of training iterations in the increasing half of a cycle 
                 mode = "triangular")
             
         elif schedule == "cosineannealing": 
-            self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, 
-                T_0 = 8,# Number of iterations for the first restart
+            self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                self.optimizer, 
+                T_0 = T_max//4,# Number of iterations for the first restart
                 T_mult = 1, # A factor increases TiTi​ after a restart
-                eta_min = 1e-5) # Minimum learning rate
+                eta_min = 0.00001) # Minimum learning rate
         
         elif schedule == "cosine_onecyclelr": 
-            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, 
+            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+                self.optimizer, 
                 max_lr = 1e-2,
-                steps_per_epoch = T_max//2, 
-                epochs = self.config["model"]["epochs"],
+                total_steps = T_max,
                 anneal_strategy = 'cos') 
             
         else: 
@@ -226,6 +226,7 @@ class Classification:
                     self.scheduler.step()
                     if self.config['wandb']['use']:
                         wandb.log({"learning rate:":self.scheduler.get_last_lr()[0]})
+                    
                     self.optimizer.zero_grad()
 
                 pbar.comment = f"loss={loss.item():2.3f}"
@@ -263,9 +264,6 @@ class Classification:
         self.setup_scheduler()
         self.count_parameters()
         
-        # GET DATASET
-        
-
         print(f"Train dataset length: {len(self.train_loader.dataset)} \nValidation dataset length: {len(self.val_loader.dataset)}")
 
         self.model = self.model.to(self.device)
@@ -292,25 +290,16 @@ class Classification:
                 best_f1 = f1
                 run_name = str(self.config["model"]["identifier"])
                 self.save_model(model_wts, run_name)
-
-        wandb.log({f"max_f1": best_f1})
+        
+        if self.config["wandb"]["use"]:
+            wandb.log({f"max_f1": best_f1})
         print(f"Best f1 score: {best_f1}")
 
 
-def load_config(config_name):
-    with open(config_name) as file:
-        config = yaml.safe_load(file)
-    return config
-
-
-def run(): 
-
-    config = load_config("config.yml")
-    identifier = random.randint(0, 10000000)
-    config["model"]["identifier"] = identifier
+def run(config): 
+    
     classifier = Classification(config)
     
-
     with wandb.init(project="Plot Detection", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 

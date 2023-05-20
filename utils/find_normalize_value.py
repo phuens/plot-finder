@@ -6,7 +6,7 @@ import os
 from PIL import Image
 import random
 
-DATASET = "dataset/train.csv"
+DATASET = "/home/phn501/plot-finder/dataset/seasons/train_emergence+data.csv"
 IMG_DIR = "dataset/images"
 batch_size = 100
 
@@ -90,7 +90,14 @@ mean, std = batch_mean_and_sd()
 print("mean and std: \n", mean, std)
 
 '''
+FOR THE WHOLE DATASET
 mean and std: 
  tensor([0.2812, 0.1616, 0.5090]) tensor([0.1981, 0.1516, 0.1076]
 
+
+FOR TRAIN EMERGENCE+ ONLY: 
+[0.4426, 0.0586, 0.4954]) tensor([0.3439, 0.0737, 0.2783]
+
 '''
+
+

@@ -74,13 +74,13 @@ class PrepareDataset:
                 transforms.ColorJitter(brightness= 0.5, hue=0.3),
                 transforms.RandomAdjustSharpness(sharpness_factor=2),
                 transforms.ToTensor(),
-                transforms.Normalize([0.4149, 0.1297, 0.4144], [0.2999, 0.1570, 0.2550])
+                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ]),
 
             "validation": transforms.Compose([
                 transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
                 transforms.ToTensor(),
-                transforms.Normalize([0.2812, 0.1616, 0.5090], [0.1981, 0.1516, 0.1076])
+                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ])
         }
 
@@ -106,25 +106,28 @@ class PrepareDataset:
 
 
             else: 
-                train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["train"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                if self.config["augmentation"]["augment"]: 
+                    train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["train"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                else: 
+                    train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 
                 # WEIGHTED SAMPLER
-                # class_labels = []
-                # for i in range(len(train_dataset)):
-                #     _, label, _, _, _=  train_dataset[i]
-                #     class_labels.append(label)
-                # class_labels = np.array(class_labels)
+                class_labels = []
+                for i in range(len(train_dataset)):
+                    _, label, _, _, _=  train_dataset[i]
+                    class_labels.append(label)
+                class_labels = np.array(class_labels)
 
-                # class_sample_count = np.array([len(class_labels)-class_labels.sum(), class_labels.sum()])
-                # weight = 1. / class_sample_count
-                # samples_weight = np.array([weight[t] for t in class_labels])
-                # samples_weight = torch.from_numpy(samples_weight)
+                class_sample_count = np.array([len(class_labels)-class_labels.sum(), class_labels.sum()])
+                weight = 1. / class_sample_count
+                samples_weight = np.array([weight[t] for t in class_labels])
+                samples_weight = torch.from_numpy(samples_weight)
                 
-                # weighted_sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
+                weighted_sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
                 
-                # train_loader = DataLoader(train_dataset, sampler = weighted_sampler, batch_size=self.config["model"]["batch"], num_workers=4)
+                train_loader = DataLoader(train_dataset, sampler = weighted_sampler, batch_size=self.config["model"]["batch"], num_workers=4)
                 
 
-                train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
+                # train_loader = DataLoader(train_dataset, batch_size=self.config["model"]["batch"], num_workers=4)
 
                 return train_loader

@@ -65,15 +65,8 @@ class Predict(Classification):
         # df.to_csv('predict/result/'+csv_name, index=False)
 
 
-
-def load_config(config_name):
-    with open(config_name) as file:
-        config = yaml.safe_load(file)
-    return config
-
-def run(): 
-    config = load_config("config.yml")
-
+def run(config): 
+    
     metric_score = pd.DataFrame(columns=["video", "accuracy", "f1", "precision", "recall", "bal_acc"])
     for files in os.listdir("/home/phuntsho/Desktop/plot-finder/plot-finder/dataset/validation_range_wise"): 
         if files.endswith(".csv"):
