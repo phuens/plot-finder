@@ -1,7 +1,11 @@
 import argparse
 import torch 
+import yaml
 
-from utils import load_config
+def load_config(config_name):
+    with open(config_name) as file:
+        config = yaml.safe_load(file)
+    return config
 
 
 def get_config():
@@ -71,13 +75,13 @@ def get_config():
 
 
     # Test
-    parser.add_argument('--name', type=str, default=config["test"]["name"], help='name of the saved model to load')
+    parser.add_argument('--test_name', type=str, default=config["test"]["name"], help='name of the saved model to load')
 
     parser.add_argument('--model_path', type=str, default=config["test"]["model_path"], help='path for the saved model to use')
 
 
     # Wandb
-    parser.add_argument('--use', type=str, default=config["wandb"]["use"], help='use wandb or not')
+    parser.add_argument('--wandb_use', type=str, default=config["wandb"]["use"], help='use wandb or not')
 
     parser.add_argument('--wandb_group', type=str, default=config["wandb"]["wandb_group"], help='experiment group name')
     
@@ -126,12 +130,14 @@ def set_param(parser, config):
     config['model']['identifier']   = args.identifier
     config['model']['class_weight'] = args.class_weight
 
-    config['test']['name']       = args.name
+    config['test']['name']       = args.test_name
     config['test']['model_path'] = args.model_path
 
 
     config['wandb']['use']          = False if str(args.wandb_use) in ["False", "false", "F", "f", 0] else True
-    config['wandb']['wandb_group']  = args.run_group
+    config['wandb']['wandb_group']  = args.wandb_group
     config['wandb']['note']         = args.note
+
+    config['type']['work']          = args.work
 
     return config

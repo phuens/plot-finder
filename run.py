@@ -1,6 +1,7 @@
 from train import training
 from predict import predict, extract_feature
 from configs import get_config
+import random
 
 
 if __name__ == '__main__':

@@ -297,10 +297,8 @@ class Classification:
 
 
 def run(config): 
-    
     classifier = Classification(config)
-    
-    with wandb.init(project="Plot Detection", group=config["wandb"]["wandb_group"],name=str(identifier), config=config) if config["wandb"]["use"] else nullcontext():
+    with wandb.init(project="Plot Detection", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 
 
