@@ -132,10 +132,10 @@ class Classification:
 
     def display_image(self, images, labels, image_name): 
         plt.figure(figsize=(20, 20))
-        for i in range(len(images)):
+        for i in range(len(images[:6])):
             ax = plt.subplot(3, 2, i + 1)
             img = images[i]
-            img = img.permute(2, 1, 0)
+            img = img.permute(1, 2, 0)
             plt.imshow(img.numpy())
             plt.title([image_name[i], labels[i]], fontsize = 8)
             plt.axis("off")
@@ -172,7 +172,6 @@ class Classification:
         yy_channel  = yy_channel*2 - 1 
 
         return xx_channel, yy_channel
-
 
     def concat_coord(self, images):
         images = images.permute(0, 2, 3, 1)

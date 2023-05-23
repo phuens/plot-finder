@@ -48,7 +48,7 @@ class Getdata(torch.utils.data.Dataset):
         img_path    = os.path.join(self.root_img_dir, path, image_name)
 
         image = Image.open(img_path)
-        image = image.convert("HSV")
+        # image = image.convert("HSV")
         image = self.transform(image)
         
         score    = self.data.loc[idx][-1]
@@ -66,7 +66,7 @@ class PrepareDataset:
 
         transform = {
             "train": transforms.Compose([
-                transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])),
+                transforms.Resize((self.config["augmentation"]["height"], self.config["augmentation"]["width"])),
                 transforms.RandomHorizontalFlip(p=self.config["augmentation"]["horizontal_flip"]),
                 transforms.RandomVerticalFlip(p=self.config["augmentation"]["vertical_flip"]),
                 transforms.RandomRotation(random.randint(0, self.config["augmentation"]["rotation"])),
@@ -74,13 +74,13 @@ class PrepareDataset:
                 transforms.ColorJitter(brightness= 0.5, hue=0.3),
                 transforms.RandomAdjustSharpness(sharpness_factor=2),
                 transforms.ToTensor(),
-                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
+                # transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ]),
 
             "validation": transforms.Compose([
-                transforms.Resize((self.config["augmentation"]["width"], self.config["augmentation"]["height"])), 
+                transforms.Resize((self.config["augmentation"]["height"], self.config["augmentation"]["width"])),
                 transforms.ToTensor(),
-                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
+                # transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ])
         }
 
@@ -107,7 +107,7 @@ class PrepareDataset:
 
             else: 
                 if self.config["augmentation"]["augment"]: 
-                    train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["train"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                    train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 else: 
                     train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 
