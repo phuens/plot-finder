@@ -81,3 +81,54 @@ IMAGENET WEIGHTS FOR TRAINING
 45  NUE_1_2019-08-07_range_3  0.00000    0.00000  0.00000  0.49686   0.84946
 46  NUE_1_2019-07-10_range_3  0.23571    0.14602  0.61111  0.50210   0.42473
 47  NUE_1_2019-07-17_range_6  0.09821    0.09483  0.10185  0.47571   0.74938
+
+
+
+BEST MODEL AND PREDICTION FOR EMERGENCE Dataset-----------MODEL-2596727_BEST___FILE-NUE_1_2019-06-27_RANGE_8.CSV-----------
+ORIGINAL
+f1: 0.754386, precision: 0.716667, recall: 0.796296, accuracy:0.929912, bal_acc: 0.873546 
+
+Naive based
+f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc: 0.844469 
+
+Prob based
+f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc: 0.844469 
+
+softmax based
+f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc: 0.844469 
+
+=========================================================================
+
+-----------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_1.CSV-----------
+ORIGINAL
+f1: 0.614286, precision: 0.565789, recall: 0.671875, accuracy:0.8875, bal_acc: 0.796274 
+
+Naive based
+f1: 0.626506, precision: 0.644628, recall: 0.609375, accuracy:0.903125, bal_acc: 0.778846 
+
+Prob based
+f1: 0.562249, precision: 0.578512, recall: 0.546875, accuracy:0.886458, bal_acc: 0.742788 
+
+softmax based
+f1: 0.570281, precision: 0.586777, recall: 0.554688, accuracy:0.888542, bal_acc: 0.747296 
+
+=========================================================================
+
+-----------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_7.CSV-----------
+ORIGINAL
+f1: 0.724638, precision: 0.675676, recall: 0.78125, accuracy:0.919662, bal_acc: 0.861285 
+
+Naive based
+f1: 0.674699, precision: 0.694215, recall: 0.65625, accuracy:0.914376, bal_acc: 0.805509 
+
+Prob based
+f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc: 0.837131 
+
+softmax based
+f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc: 0.837131 
+
+=========================================================================
+
+softmax f1: 0.682539
+naive f1:  0.690154
+prob f1: 0.679861

@@ -1,0 +1,6 @@
+year,trial,date,camera,range,image,class,position,img_path
+2019,NUE_2,2019-06-27,left_middle_L1,range_7_click_2,G0162035.JPG,0,12,2019/NUE_2/2019-06-27/left_middle_L1/range_7_click_2
+2019,NUE_2,2019-07-17,left_middle_L1,range_6,G0623477.JPG,0,7,2019/NUE_2/2019-07-17/left_middle_L1/range_6
+2019,NUE_1,2019-06-27,left_outside_L2,range_8_click_1,G0350868.JPG,0,183,2019/NUE_1/2019-06-27/left_outside_L2/range_8_click_1
+2019,NUE_1,2019-06-27,left_outside_L2,range_8_click_2,G0361093.JPG,1,10,2019/NUE_1/2019-06-27/left_outside_L2/range_8_click_2
+2019,NUE_2,2019-07-10,left_middle_L1,range_3,G0548470.JPG,1,6,2019/NUE_2/2019-07-10/left_middle_L1/range_3

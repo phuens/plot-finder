@@ -48,7 +48,7 @@ class Getdata(torch.utils.data.Dataset):
         img_path    = os.path.join(self.root_img_dir, path, image_name)
 
         image = Image.open(img_path)
-        # image = image.convert("HSV")
+        image = image.convert("HSV")
         image = self.transform(image)
         
         score    = self.data.loc[idx][-1]
@@ -73,14 +73,14 @@ class PrepareDataset:
                 transforms.GaussianBlur(5, sigma=(self.config["augmentation"]["gaussian"], 2.0)),
                 transforms.ColorJitter(brightness= 0.5, hue=0.3),
                 transforms.RandomAdjustSharpness(sharpness_factor=2),
-                transforms.ToTensor(),
+                transforms.ToTensor()
                 # transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ]),
 
             "validation": transforms.Compose([
                 transforms.Resize((self.config["augmentation"]["height"], self.config["augmentation"]["width"])),
                 transforms.ToTensor(),
-                # transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
+                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ])
         }
 

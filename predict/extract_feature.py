@@ -96,7 +96,8 @@ class Predict(Classification):
         print(f"{f1} {precision} {recall} {accuracy} {bal_acc}")
         print("-------------------------------------------------------")
         return f1, precision, recall, accuracy, bal_acc
-            
+
+
 def load_config(config_name):
     with open(config_name) as file:
         config = yaml.safe_load(file)
