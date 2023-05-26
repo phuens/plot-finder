@@ -74,7 +74,7 @@ class PrepareDataset:
                 transforms.ColorJitter(brightness= 0.5, hue=0.3),
                 transforms.RandomAdjustSharpness(sharpness_factor=2),
                 transforms.ToTensor(),
-                # transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
+                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
             ]),
 
             "validation": transforms.Compose([

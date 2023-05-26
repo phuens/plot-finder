@@ -32,7 +32,7 @@ def calculate_metrics(targets, predicted):
 	recall = metrics.recall_score(targets, predicted)
 	bal_acc = metrics.balanced_accuracy_score(targets, predicted)
 
-	print(f"f1: {f1}, precision: {precision}, recall: {recall}, accuracy:{accuracy}, bal_acc: {bal_acc}")       
+	print(f"f1: {f1}, precision: {precision}, recall: {recall}, accuracy:{accuracy}, bal_acc: {bal_acc} \n")       
 	return accuracy, f1, precision, recall, bal_acc
 
 
@@ -44,28 +44,35 @@ def probability_based_removal(data):
 			data(pandas.DataFrame)
 	'''
 
-	prediction = data['predicted'].copy()
-	for index in range(len(prediction)-1):
-		if (prediction[index] == 1) and (prediction[index+1] == 1):
-			# print(data['1_prob'][index], data['1_prob'][index+1])
-			# make the element with greater prob 1 and the other 0
-			greater_prob = data['1_prob'][index] > data['1_prob'][index+1]
-			prediction[index] = int(greater_prob)
-			prediction[index+1] = int(not greater_prob)
+	prob_based = data['predicted'].copy()
+	softmax_based = data['predicted'].copy()
+	for index in range(len(prob_based)-1):
+		if (prob_based[index] == 1) and (prob_based[index+1] == 1):
+
+			#based on the linear output of the two classes
+			greater_prob = data['prob_1'][index] > data['prob_1'][index+1]
+			prob_based[index] = int(greater_prob)
+			prob_based[index+1] = int(not greater_prob)
+
+			# based on the softmax activation of the ouput
+			greater_prob = data['softmax_1'][index] > data['softmax_1'][index+1]
+			softmax_based[index] = int(greater_prob)
+			softmax_based[index+1] = int(not greater_prob)
 				   
 
-	return prediction
+	return prob_based, softmax_based
 
 
 
 def process_data():
-	filename="/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/6099445_emergence.csv"
+	filename="/home/phn501/plot-finder/predict/result/csv/model-2596727_best___file-NUE_1_2019-06-27_range_8.csv"
 	file_df 	= read_file(filename)
 	# file_df 	= file_df.drop('misc', axis=1)
 	naive_based = naive_remove_duplicates(file_df)
-	prob_based  = probability_based_removal(file_df)
+	prob_based, softmax_based  = probability_based_removal(file_df)
 	file_df['naive_based'] 	= naive_based
 	file_df['prob_based'] 	= prob_based
+	file_df['softmax_based'] 	= softmax_based
 	
 	target = file_df["target"]
 
@@ -75,6 +82,9 @@ def process_data():
 	print("Prob based")
 	calculate_metrics(target, prob_based)
 
-	file_df.to_csv('processed.csv')
+	print("softmax based")
+	calculate_metrics(target, softmax_based)
+
+	file_df.to_csv(filename, index=False)
 	
 process_data()

@@ -31,8 +31,8 @@ class Predict(Classification):
         get_data =  PrepareDataset(self.config)
         self.test_data = get_data.prepare_dataset(category='validation')
 
-        # model_path = os.path.join(self.config["test"]["model_path"], self.config["test"]["name"])
-        # self.model.load_state_dict(torch.load(model_path))
+        model_path = os.path.join(self.config["test"]["model_path"], self.config["test"]["name"])
+        self.model.load_state_dict(torch.load(model_path))
 
 
     def append_feature(self, image_name, features): 
@@ -42,6 +42,7 @@ class Predict(Classification):
                 self.global_feature[image_name[i]] = features[i].cpu().numpy()
         else: 
             self.global_feature[image_name[0]] = features.cpu().numpy()
+
 
     def return_features_as_1D(self): 
         sorted_feature = sorted(self.global_feature.items())
@@ -56,7 +57,7 @@ class Predict(Classification):
         self.model.avgpool.register_forward_hook(self.get_feature('avgpool'))
         predicted, position, gtscore, target, image_name = [], [], [], [], []
 
-        # return 
+
         with torch.no_grad(): 
             for (images, label, score, pos, img_name) in tqdm(self.test_data): 
                 images = images.to(self.device)
@@ -80,6 +81,7 @@ class Predict(Classification):
         features    = np.array(self.return_features_as_1D())
         f1, precision, recall, accuracy, bal_acc = self.calc_metrics(target, predicted)
         
+        print(image_name)
         return position, gtscore, target, image_name, features, f1, precision, recall, accuracy, bal_acc
 
 
@@ -93,38 +95,37 @@ class Predict(Classification):
         precision   = round(metrics.precision_score(targets, predicted), 5)
         recall      = round(metrics.recall_score(targets, predicted), 5)
         bal_acc     = round(metrics.balanced_accuracy_score(targets, predicted), 5)
-        print(f"{f1} {precision} {recall} {accuracy} {bal_acc}")
+        print(f"f1:{f1}, precision:{precision}, recall:{recall}, accuracy:{accuracy} bal_acc:{bal_acc}")
         print("-------------------------------------------------------")
         return f1, precision, recall, accuracy, bal_acc
-            
-def load_config(config_name):
-    with open(config_name) as file:
-        config = yaml.safe_load(file)
-    return config
-
-def run(): 
-    config  = load_config("config.yml")
-    h5_file = h5py.File('hsv_training_feature_imagenet.h5', 'w')
+           
+           
+def run(config): 
+    
     videos  = [] 
     
     metric_score = pd.DataFrame(columns=["video", "f1", "precision", "recall", "bal_acc", "accuracy"])
 
-    directory = "dataset/score_data/train"
+    directory   = "dataset/score_data/emergence/train"
+    counter     = 0
+
+    category    = directory.split("/")[-1]
+    h5_filename = f"{config['test']['name']}_{category}_feature.h5"
+    h5_file     = h5py.File(h5_filename, 'w')
 
 
-    counter = 0
     for file in os.listdir(directory):
         if file.endswith('.csv'):
             config['dataset']['validation_csv'] =  directory+"/"+str(file)
 
-            print("\n", config['dataset']['validation_csv'])
+            print(f"\n {config['dataset']['validation_csv']}")
 
             model = Predict(config)
             model.setup_testing()
             position, gtscore, target, image_name, feature, f1, precision, recall, accuracy, bal_acc = model.predict()
 
             if counter == 0: 
-                print(gtscore)
+                print(f"printing out the score jsut to check: \n{gtscore}")
                 counter += 1
 
 
@@ -144,7 +145,12 @@ def run():
             h5_file.create_dataset(f'{video_name}/features', data=feature)
             h5_file.create_dataset(f'{video_name}/position', data=position)
             h5_file.create_dataset(f'{video_name}/gttarget', data=target)
-            # h5_file.create_dataset(f'{video_name}/img_name', data=image_name)
+
+            # need to encode unicode to ASCII
+            asciiList = [n.encode("ascii", "ignore") for n in image_name]
+            # h5File.create_dataset('xxx', (len(asciiList),1),'S10', asciiList)
+
+            h5_file.create_dataset(f'{video_name}/img_name', data=asciiList)
     
     h5_file.close()
     print(metric_score)
