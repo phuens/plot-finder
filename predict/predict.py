@@ -41,6 +41,7 @@ class Predict(Classification):
         bz, nc, h, w = feature_conv.shape
         output_cam = []
         for idx in class_idx:
+            f_sghape = feature_conv.reshape((nc, h*w))
             cam = weight_softmax[idx].dot(feature_conv.reshape((nc, h*w)))
             cam = cam.reshape(h, w)
             cam = cam - np.min(cam)
@@ -48,25 +49,21 @@ class Predict(Classification):
             cam_img = np.uint8(255 * cam_img)
             output_cam.append(cv2.resize(cam_img, size_upsample))
         return output_cam
-
-
-    def mkdir(self, dir): 
-        if not os.path.exists(dir): 
-            os.mkdir(dir)
-
-
-    def show_cam(self, CAMs, orig_image, class_idx, save_dir, save_name, label):
-        for i, cam in enumerate(CAMs):            
+    
+    def show_cam(self, CAMs, orig_image, class_idx, save_name, target):
+        for i, cam in enumerate(CAMs):
+            
             heatmap = cv2.applyColorMap(cv2.resize(cam,(self.width, self.height)), cv2.COLORMAP_JET)
 
-            target      = label.cpu().detach().numpy()
-            target      = target[0]
-            orig_image  = orig_image.cpu().detach().numpy()
-            orig_image  = orig_image.transpose(2, 3, 1, 0).squeeze(axis=3)
+            orig_image = orig_image.cpu().detach().numpy()
+            orig_image = orig_image.transpose(2, 3, 1, 0).squeeze(axis=3)
+            orig_image = cv2.cvtColor(orig_image, cv2.COLOR_HSV2RGB)
 
             orig_image = cv2.normalize(orig_image, None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX, dtype = cv2.CV_32F)
-
             orig_image = orig_image.astype(np.uint8)
+            path = f"/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/orig/{save_name}"
+
+            cv2.imwrite(path,orig_image)
            
             heatmap = np.array(heatmap, dtype="float32")
             result = heatmap * 0.3 + orig_image * 0.9
@@ -82,12 +79,16 @@ class Predict(Classification):
             else: 
                 name += "_W"
             
-            save_name = name+"."+ext
-            self.mkdir(save_dir)
-            path = os.path.join(save_dir, save_name)
-            
-            # cv2.imshow('CAM', result/255.)
-            # cv2.waitKey(0)
+            target = target.cpu().detach().numpy()
+            name, ext = save_name.split(".")
+            if target[0] == 1: name += "_centered"
+
+            if class_idx[i] != target[0]: 
+                name += "_wrong"
+                
+
+            save_name = name+"."+ext.lower()
+            path = f"/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/CAM/{save_name}"
             cv2.imwrite(path,result)
 
 
@@ -111,6 +112,7 @@ class Predict(Classification):
         softmax_0, softmax_1, prob_0, prob_1, predicted, target, image_name = [], [], [], [], [], [], []
 
         params = list(self.model.parameters())
+
         weight_softmax = np.squeeze(params[-2].data.cpu().numpy())
         counter = 0 
         with torch.no_grad(): 
@@ -121,36 +123,32 @@ class Predict(Classification):
                 images = images.to(self.device)
                 label = label.to(self.device)
                 outputs = self.model(images)
-                # print("outputs: ", outputs)
-                # ---------------- CAM -----------------------img_name
-                probs = F.softmax(outputs, dim=1).data.squeeze()
-                probs = probs.cpu().numpy()
-            
-                # class_idx = topk(probs, 1)[1].int()
-                softmax_0.append(probs[0])
-                softmax_1.append(probs[1])
-                
-                # # generate class activation mapping for the top1 prediction
-                # CAMs = self.returnCAM(self.features_blobs[counter], weight_softmax, class_idx)
-                # counter += 1
 
-                # save_dir =  "/home/phn501/plot-finder/predict/result/CAM/"+self.config['test']['filename']
-                # self.show_cam(CAMs, images, class_idx, save_dir, str(img_name[0]), label)
-                #  --------------------------------------------
-                _, preds = torch.max(outputs, 1)
-                outputs = outputs.cpu().numpy().squeeze()
-                prob_0.append(outputs[0])
-                prob_1.append(outputs[1])
+                probability.append(outputs.cpu().numpy())
+                # print(str(img_name[0]), "----", outputs)
+                probs = F.softmax(outputs, dim=1).data.squeeze()
                 
+                _, preds = torch.max(outputs, 1)
+                # predicted_idx = preds.item()
                 predicted.append(preds.cpu().numpy())
                 target.append(label.cpu().numpy())
                 image_name.append(img_name)
+                
+                class_idx = topk(probs, 1)[1].int()
+
+                # generate class activation mapping for the top1 prediction
+                CAMs = self.returnCAM(self.features_blobs[counter], weight_softmax, class_idx)
+                counter += 1
+
+                self.show_cam(CAMs, images, class_idx, str(img_name[0]), label)
+                
+                
 
         accuracy, f1, precision, recall, bal_acc = self.calculate_metrics(predicted=predicted, targets=target)
         
         # print(f"f1:{f1}, precision: {precision}, recall: {recall}, bal_acc: {bal_acc} Acc: {accuracy} ")
         print(self.config["dataset"]["validation_csv"])
-        print(f"f1: {round(f1, 5)}, precision: {round(precision, 5)}, recall: {round(recall, 5)} {round(bal_acc, 5)} {round(accuracy, 5)} ")
+        print(f"f1: {round(f1, 5)},  precision: {round(precision, 5)}, recall: {round(recall, 5)}, {round(bal_acc, 5)}, {round(accuracy, 5)} ")
         print("\n")
         
         # prob_0 = np.concatenate(prob_0)
@@ -176,11 +174,11 @@ class Predict(Classification):
 
 def run(config): 
    
-    # config['dataset']['test_csv']   = config['dataset']['validation_csv'] = str("dataset/validation_range_wise/test_test.csv")
-    # config['model']['batch'] = 1 
-    # model = Predict(config)
-    # model.setup_testing()
-    # accuracy, f1, precision, recall , bal_acc = model.predict()
+    config['dataset']['test_csv']   = config['dataset']['validation_csv'] = str("/home/phuntsho/Desktop/plot-finder/plot-finder/dataset/validation_range_wise/NUE_1_2019-06-27_range_8.csv")
+    config['model']['batch'] = 1
+    model = Predict(config)
+    model.setup_testing()
+    accuracy, f1, precision, recall , bal_acc = model.predict()
             
    
     metric_score = pd.DataFrame(columns=["video", "accuracy", "f1", "precision", "recall", "bal_acc"])

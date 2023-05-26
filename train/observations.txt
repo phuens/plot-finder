@@ -1,0 +1,81 @@
+
+1. Postion embedding seems to have no effect on the model's performance.
+    We use sine consine to construct position embedding which we then use to concatenate to the second last layer of the model before it is flattened. 
+
+
+
+
+WITH IMAGENET WEIGHTS
+                      video       f1  precision   recall  bal_acc  accuracy
+0  NUE_1_2019-06-27_range_8  0.05517    0.10811  0.03704  0.49464   0.82854
+1  NUE_1_2019-07-10_range_1  0.22877    0.14072  0.61111  0.49508   0.41215
+2  NUE_2_2019-08-07_range_2  0.00000    0.00000  0.00000  0.49733   0.84966
+3  NUE_2_2019-07-17_range_6  0.11258    0.09770  0.13281  0.47183   0.72025
+4  NUE_2_2019-06-27_range_7  0.14286    0.11017  0.20312  0.47320   0.67019
+5  NUE_1_2019-08-07_range_5  0.00000    0.00000  0.00000  0.49605   0.84750
+6  NUE_1_2019-07-17_range_4  0.03008    0.08000  0.01852  0.49292   0.84113
+7  NUE_2_2019-07-10_range_3  0.24431    0.14427  0.79688  0.49989   0.28861
+
+
+WITHOUT IMAGENET WEIGHTS
+
+                      video       f1  precision   recall  bal_acc  accuracy
+0  NUE_1_2019-06-27_range_8  0.00000    0.00000  0.00000  0.49855   0.86233
+1  NUE_1_2019-07-10_range_1  0.01527    0.04348  0.00926  0.48768   0.82959
+2  NUE_2_2019-08-07_range_2  0.17219    0.56522  0.10156  0.54411   0.85763
+3  NUE_2_2019-07-17_range_6  0.01460    0.11111  0.00781  0.49909   0.85908
+4  NUE_2_2019-06-27_range_7  0.00000    0.00000  0.00000  0.49756   0.86047
+5  NUE_1_2019-08-07_range_5  0.06780    0.40000  0.03704  0.51378   0.85155
+6  NUE_1_2019-07-17_range_4  0.01613    0.06250  0.00926  0.49398   0.84975
+7  NUE_2_2019-07-10_range_3  0.06024    0.13158  0.03906  0.49779   0.82413
+
+
+
+BEST MODEL AND PREDICTION FOR EMERGENCE Dataset-----------MODEL-2596727_BEST___FILE-NUE_1_2019-06-27_RANGE_8.CSV-----------
+ORIGINAL
+f1: 0.754386, precision: 0.716667, recall: 0.796296, accuracy:0.929912, bal_acc: 0.873546 
+
+Naive based
+f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc: 0.844469 
+
+Prob based
+f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc: 0.844469 
+
+softmax based
+f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc: 0.844469 
+
+=========================================================================
+
+-----------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_1.CSV-----------
+ORIGINAL
+f1: 0.614286, precision: 0.565789, recall: 0.671875, accuracy:0.8875, bal_acc: 0.796274 
+
+Naive based
+f1: 0.626506, precision: 0.644628, recall: 0.609375, accuracy:0.903125, bal_acc: 0.778846 
+
+Prob based
+f1: 0.562249, precision: 0.578512, recall: 0.546875, accuracy:0.886458, bal_acc: 0.742788 
+
+softmax based
+f1: 0.570281, precision: 0.586777, recall: 0.554688, accuracy:0.888542, bal_acc: 0.747296 
+
+=========================================================================
+
+-----------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_7.CSV-----------
+ORIGINAL
+f1: 0.724638, precision: 0.675676, recall: 0.78125, accuracy:0.919662, bal_acc: 0.861285 
+
+Naive based
+f1: 0.674699, precision: 0.694215, recall: 0.65625, accuracy:0.914376, bal_acc: 0.805509 
+
+Prob based
+f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc: 0.837131 
+
+softmax based
+f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc: 0.837131 
+
+=========================================================================
+
+softmax f1: 0.682539
+naive f1:  0.690154
+prob f1: 0.679861

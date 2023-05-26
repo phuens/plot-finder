@@ -12,6 +12,7 @@ config.yml
 *models/
 *dataset/images
 *dataset/features
+*/home/phn501/plot-finder/predict/result/CAM
 
 predict/*extratced_feature/
 

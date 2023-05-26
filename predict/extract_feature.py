@@ -98,10 +98,16 @@ class Predict(Classification):
         print(f"f1:{f1}, precision:{precision}, recall:{recall}, accuracy:{accuracy} bal_acc:{bal_acc}")
         print("-------------------------------------------------------")
         return f1, precision, recall, accuracy, bal_acc
-           
-           
-def run(config): 
-    
+
+
+def load_config(config_name):
+    with open(config_name) as file:
+        config = yaml.safe_load(file)
+    return config
+
+def run(): 
+    config  = load_config("config.yml")
+    h5_file = h5py.File('hsv_training_feature_imagenet.h5', 'w')
     videos  = [] 
     
     metric_score = pd.DataFrame(columns=["video", "f1", "precision", "recall", "bal_acc", "accuracy"])
