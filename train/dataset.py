@@ -73,14 +73,14 @@ class PrepareDataset:
                 transforms.GaussianBlur(5, sigma=(self.config["augmentation"]["gaussian"], 2.0)),
                 transforms.ColorJitter(brightness= 0.5, hue=0.3),
                 transforms.RandomAdjustSharpness(sharpness_factor=2),
-                transforms.ToTensor()
-                # transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
+                transforms.ToTensor(),
+                transforms.Normalize([0.4123, 0.1420, 0.4864], [0.2991, 0.1497, 0.2284])
             ]),
 
             "validation": transforms.Compose([
                 transforms.Resize((self.config["augmentation"]["height"], self.config["augmentation"]["width"])),
                 transforms.ToTensor(),
-                transforms.Normalize([0.4426, 0.0586, 0.4954], [0.3439, 0.0737, 0.2783])
+                transforms.Normalize([0.4123, 0.1152, 0.4308], [0.3049, 0.1496, 0.2514])
             ])
         }
 
@@ -107,7 +107,7 @@ class PrepareDataset:
 
             else: 
                 if self.config["augmentation"]["augment"]: 
-                    train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
+                    train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["train"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 else: 
                     train_dataset = Getdata(csv_file=self.config["dataset"]["train_csv"], transform=transform["validation"], root_img_dir=self.config["dataset"]["root_img_dir"])
                 

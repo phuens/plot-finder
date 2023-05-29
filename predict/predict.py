@@ -123,25 +123,27 @@ class Predict(Classification):
                 images = images.to(self.device)
                 label = label.to(self.device)
                 outputs = self.model(images)
-
-                probability.append(outputs.cpu().numpy())
-                # print(str(img_name[0]), "----", outputs)
                 probs = F.softmax(outputs, dim=1).data.squeeze()
+                
+                prob_0.append(outputs[0])
+                prob_1.append(outputs[1])
+                softmax_0.append(probs[0])
+                softmax_1.append(probs[1])
                 
                 _, preds = torch.max(outputs, 1)
                 # predicted_idx = preds.item()
                 predicted.append(preds.cpu().numpy())
                 target.append(label.cpu().numpy())
                 image_name.append(img_name)
-                
-                class_idx = topk(probs, 1)[1].int()
 
-                # generate class activation mapping for the top1 prediction
-                CAMs = self.returnCAM(self.features_blobs[counter], weight_softmax, class_idx)
-                counter += 1
-
-                self.show_cam(CAMs, images, class_idx, str(img_name[0]), label)
-                
+                # ******  GENERATE CAM ******
+                if 1 == 2: 
+                    class_idx = topk(probs, 1)[1].int()
+                    # generate class activation mapping for the top1 prediction
+                    CAMs = self.returnCAM(self.features_blobs[counter], weight_softmax, class_idx)
+                    counter += 1
+                    self.show_cam(CAMs, images, class_idx, str(img_name[0]), label)
+                # ***********
                 
 
         accuracy, f1, precision, recall, bal_acc = self.calculate_metrics(predicted=predicted, targets=target)
@@ -151,10 +153,6 @@ class Predict(Classification):
         print(f"f1: {round(f1, 5)},  precision: {round(precision, 5)}, recall: {round(recall, 5)}, {round(bal_acc, 5)}, {round(accuracy, 5)} ")
         print("\n")
         
-        # prob_0 = np.concatenate(prob_0)
-        # prob_1 = np.concatenate(prob_1)
-        # softmax_0 = np.concatenate(softmax_0)
-        # softmax_1 = np.concatenate(softmax_1)
         predicted = np.concatenate(predicted)
         target = np.concatenate(target)
         image_name = np.concatenate(image_name)
@@ -173,7 +171,6 @@ class Predict(Classification):
 
 
 def run(config): 
-   
     config['dataset']['test_csv']   = config['dataset']['validation_csv'] = str("/home/phuntsho/Desktop/plot-finder/plot-finder/dataset/validation_range_wise/NUE_1_2019-06-27_range_8.csv")
     config['model']['batch'] = 1
     model = Predict(config)
@@ -186,7 +183,8 @@ def run(config):
         if files.endswith(".csv"):
             config['dataset']['test_csv']   = config['dataset']['validation_csv'] = str("dataset/validation_range_wise/emergence/"+files)
             config['test']['filename']      = files
-
+            config['model']['batch']        = 1
+            
             model = Predict(config)
             model.setup_testing()
             accuracy, f1, precision, recall , bal_acc = model.predict()

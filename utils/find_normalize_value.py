@@ -6,7 +6,7 @@ import os
 from PIL import Image
 import random
 
-DATASET = "/home/phn501/plot-finder/dataset/seasons/train_emergence+data.csv"
+DATASET = "/home/phn501/plot-finder/dataset/general/validation.csv"
 IMG_DIR = "dataset/images"
 batch_size = 100
 
@@ -15,13 +15,10 @@ class Getdata(torch.utils.data.Dataset):
         self.data = pd.read_csv(csv_file)
         self.transform = transform
         self.root_img_dir = root_img_dir
-
-    
     
     def __len__(self): 
         return len(self.data.index)
     
-
     def __getitem__(self, idx):
         image_name  = self.data.loc[idx][5]
         path        = self.data.loc[idx][8]
@@ -59,10 +56,6 @@ def prepare_dataset():
     return train_loader
 
 
-
-
-
-
 def batch_mean_and_sd():
     loader = prepare_dataset()
     
@@ -91,10 +84,16 @@ print("mean and std: \n", mean, std)
 
 '''
 FOR THE WHOLE DATASET
+Train: 
 mean and std: 
- tensor([0.2812, 0.1616, 0.5090]) tensor([0.1981, 0.1516, 0.1076]
+ tensor([0.4123, 0.1420, 0.4864]) tensor([0.2991, 0.1497, 0.2284])
+
+Validation: 
+mean and std: 
+ tensor([0.4123, 0.1152, 0.4308]) tensor([0.3049, 0.1496, 0.2514])
 
 
+ 
 FOR TRAIN EMERGENCE+ ONLY: 
 [0.4426, 0.0586, 0.4954]) tensor([0.3439, 0.0737, 0.2783]
 

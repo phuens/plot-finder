@@ -31,7 +31,11 @@ WITHOUT IMAGENET WEIGHTS
 
 
 
-BEST MODEL AND PREDICTION FOR EMERGENCE Dataset-----------MODEL-2596727_BEST___FILE-NUE_1_2019-06-27_RANGE_8.CSV-----------
+
+************************************************************************
+BEST MODEL AND PREDICTION FOR EMERGENCE Dataset ***BASELINE MODEL***
+************************************************************************
+-----------MODEL-2596727_BEST___FILE-NUE_1_2019-06-27_RANGE_8.CSV-----------
 ORIGINAL
 f1: 0.754386, precision: 0.716667, recall: 0.796296, accuracy:0.929912, bal_acc: 0.873546 
 
@@ -79,3 +83,46 @@ f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc:
 softmax f1: 0.682539
 naive f1:  0.690154
 prob f1: 0.679861
+
+
+************************************************************************
+BEST MODEL AND PREDICTION FOR EMERGENCE Dataset ***ATTENTION MODEL***
+************************************************************************
+-----------NUE_1_2019-06-27_RANGE_8.CSV-----------
+ORIGINAL
+f1: 0.748201, precision: 0.611765, recall: 0.962963, accuracy:0.91239, bal_acc: 0.933725 
+
+Naive based
+f1: 0.645161, precision: 0.642202, recall: 0.648148, accuracy:0.90363, bal_acc: 0.795854 
+
+Prob based
+f1: 0.744186, precision: 0.747664, recall: 0.740741, accuracy:0.931164, bal_acc: 0.850833 
+
+=========================================================================
+
+-----------NUE_2_2019-06-27_RANGE_7.CSV-----------
+ORIGINAL
+f1: 0.668712, precision: 0.547739, recall: 0.858268, accuracy:0.885835, bal_acc: 0.874189 
+
+Naive based
+f1: 0.492308, precision: 0.481203, recall: 0.503937, accuracy:0.860465, bal_acc: 0.709844 
+
+Prob based
+f1: 0.716535, precision: 0.716535, recall: 0.716535, accuracy:0.92389, bal_acc: 0.83629 
+
+=========================================================================
+
+-----------NUE_2_2019-06-27_RANGE_1.CSV-----------
+ORIGINAL
+f1: 0.623907, precision: 0.497674, recall: 0.835938, accuracy:0.865625, bal_acc: 0.853065 
+
+Naive based
+f1: 0.682171, precision: 0.676923, recall: 0.6875, accuracy:0.914583, bal_acc: 0.81851 
+
+Prob based
+f1: 0.596078, precision: 0.598425, recall: 0.59375, accuracy:0.892708, bal_acc: 0.766226 
+
+=========================================================================
+
+naive f1:  0.64341
+prob f1: 0.6856
