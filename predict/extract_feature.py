@@ -9,6 +9,7 @@ from collections import OrderedDict
 import h5py
 import sklearn.metrics as metrics 
 import pandas as pd
+import random
 
 
 from train.training import Classification
@@ -99,26 +100,36 @@ class Predict(Classification):
         print("-------------------------------------------------------")
         return f1, precision, recall, accuracy, bal_acc
 
+def shuffle_data(gtscore, feature, position, target, name):
+    for i in range(len(gtscore) - 1, 0, -1):
+        #generate a random number between 0 and index. 
+        j = random.randint(0, i)
+        # swap the elements at index i and j 
+        gtscore[i] , gtscore[j]     = gtscore[j], gtscore[i] 
+        feature[i] , feature[j]     = feature[j], feature[i] 
+        position[i], position[j]    = position[j], position[i] 
+        target[i]  , target[j]      = target[j], target[i]
+        name[i]    , name[j]        = name[j], name[i]
+    
+    return gtscore, feature, position, target, name
+    
 
-def load_config(config_name):
-    with open(config_name) as file:
-        config = yaml.safe_load(file)
-    return config
-
-def run(): 
-    config  = load_config("config.yml")
-    h5_file = h5py.File('hsv_training_feature_imagenet.h5', 'w')
+def run(config): 
     videos  = [] 
     
     metric_score = pd.DataFrame(columns=["video", "f1", "precision", "recall", "bal_acc", "accuracy"])
 
-    directory   = "dataset/score_data/emergence/train"
+    directory   = "dataset/score_data/emergence/validation"
     counter     = 0
 
+    model_name = config['test']['name']
+    model_name = model_name.split(".")[0]
+    print("model name:", model_name)
     category    = directory.split("/")[-1]
-    h5_filename = f"{config['test']['name']}_{category}_feature.h5"
+    h5_filename = f"{model_name}_{category}_feature.h5"
     h5_file     = h5py.File(h5_filename, 'w')
 
+    shuffle = False
 
     for file in os.listdir(directory):
         if file.endswith('.csv'):
@@ -131,7 +142,7 @@ def run():
             position, gtscore, target, image_name, feature, f1, precision, recall, accuracy, bal_acc = model.predict()
 
             if counter == 0: 
-                print(f"printing out the score jsut to check: \n{gtscore}")
+                print(f"printing out the score just to check: \n{gtscore}")
                 counter += 1
 
 
@@ -147,6 +158,11 @@ def run():
                 "accuracy"  : accuracy, 
             }, ignore_index = True)
 
+            if shuffle: 
+                gtscore, feature, position, target, image_name = shuffle_data(gtscore, feature, position, target, image_name)
+            
+            df = pd.DataFrame(zip(image_name, gtscore, feature, position, target), columns=["name", "score", "features", "position", "target"])
+            df.to_csv("randomized_feature.csv")
             h5_file.create_dataset(f'{video_name}/gtscore',  data=gtscore)
             h5_file.create_dataset(f'{video_name}/features', data=feature)
             h5_file.create_dataset(f'{video_name}/position', data=position)
@@ -154,7 +170,6 @@ def run():
 
             # need to encode unicode to ASCII
             asciiList = [n.encode("ascii", "ignore") for n in image_name]
-            # h5File.create_dataset('xxx', (len(asciiList),1),'S10', asciiList)
 
             h5_file.create_dataset(f'{video_name}/img_name', data=asciiList)
     
