@@ -11,7 +11,7 @@ config.yml
 *wandb/
 *models/
 *dataset/images
-*dataset/features
+*dataset/extracted_feature
 */home/phn501/plot-finder/predict/result/CAM
 
 predict/*extratced_feature/

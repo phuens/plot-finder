@@ -20,11 +20,19 @@ from train.dataset import PrepareDataset
 
 class Classification: 
     def __init__(self, config: object) -> None:
-        torch.manual_seed(config["model"]["seed"])
         self.config = config 
+        self.seed()
         self.model = get_model(self.config["model"]["name"], self.config["model"]["classes"])
+        # self.model.load_state_dict(torch.load("/home/phn501/plot-finder/models/2596727_cool_sweep_emergence.pt"))
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f'Model: {self.config["model"]["name"]}')
+
+
+    def seed(self): 
+        torch.manual_seed(self.config["model"]["seed"])
+        torch.cuda.manual_seed_all(self.config["model"]["seed"])
+        np.random.seed(self.config["model"]["seed"])
+        random.seed(self.config["model"]["seed"])
 
 
     def setup_logging(self): 
@@ -141,46 +149,6 @@ class Classification:
             plt.axis("off")
 
         plt.show()       
-    
-
-    def create_coord(self, batch): 
-        width   = self.config["augmentation"]["width"]
-        height  = self.config["augmentation"]["height"]
-
-
-        xx_ones     = torch.ones([batch, width], dtype=torch.int64) # (batch x width)
-        xx_ones     = xx_ones.unsqueeze(-1)
-        xx_range    = torch.arange(height).unsqueeze(0).repeat(batch, 1) 
-        xx_range    = xx_range.unsqueeze(1) # (batch x 1 x height)
-        
-
-        xx_channel  = torch.matmul(xx_ones.float(), xx_range.float())
-        xx_channel  = xx_channel.unsqueeze(-1)
-        
-        yy_ones     = torch.ones([batch, height], dtype=torch.int64)
-        yy_ones     = yy_ones.unsqueeze(1)
-
-        yy_range    = torch.arange(width).unsqueeze(0).repeat(batch, 1)
-        yy_range    = yy_range.unsqueeze(-1)
-
-        yy_channel  = torch.matmul(yy_range.float(), yy_ones.float())
-        yy_channel  = yy_channel.unsqueeze(-1)
-        
-        xx_channel  = xx_channel.float() / (width - 1)
-        yy_channel  = yy_channel.float() / (height - 1)
-        xx_channel  = xx_channel*2 - 1
-        yy_channel  = yy_channel*2 - 1 
-
-        return xx_channel, yy_channel
-
-    def concat_coord(self, images):
-        images = images.permute(0, 2, 3, 1)
-
-        xx, yy = self.create_coord(batch=len(images))
-        images =  torch.cat([images, xx, yy], dim=-1)
-        images = images.permute(0, 3, 1, 2)
-        
-        return images
 
     def one_epoch(self, train=True, epoch=0): 
         if train: 
@@ -296,8 +264,9 @@ class Classification:
 
 
 def run(config): 
+    print("cuda" if torch.cuda.is_available() else "cpu")
     classifier = Classification(config)
-    with wandb.init(project="Plot Detection", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():
+    with wandb.init(project="Inception - plot detection", group=config["wandb"]["wandb_group"], config=config) if config["wandb"]["use"] else nullcontext():
         classifier.train()
 
 

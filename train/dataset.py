@@ -74,13 +74,13 @@ class PrepareDataset:
                 transforms.ColorJitter(brightness= 0.5, hue=0.3),
                 transforms.RandomAdjustSharpness(sharpness_factor=2),
                 transforms.ToTensor(),
-                transforms.Normalize([0.4123, 0.1420, 0.4864], [0.2991, 0.1497, 0.2284])
+                transforms.Normalize([0.4163, 0.1238, 0.4397], [0.3068, 0.1448, 0.2682])
             ]),
 
             "validation": transforms.Compose([
                 transforms.Resize((self.config["augmentation"]["height"], self.config["augmentation"]["width"])),
                 transforms.ToTensor(),
-                transforms.Normalize([0.4123, 0.1152, 0.4308], [0.3049, 0.1496, 0.2514])
+                transforms.Normalize([0.4100, 0.1294, 0.4414], [0.3046, 0.1419, 0.2636])
             ])
         }
 

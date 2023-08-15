@@ -50,21 +50,6 @@ f1: 0.746411, precision: 0.772277, recall: 0.722222, accuracy:0.933667, bal_acc:
 
 =========================================================================
 
------------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_1.CSV-----------
-ORIGINAL
-f1: 0.614286, precision: 0.565789, recall: 0.671875, accuracy:0.8875, bal_acc: 0.796274 
-
-Naive based
-f1: 0.626506, precision: 0.644628, recall: 0.609375, accuracy:0.903125, bal_acc: 0.778846 
-
-Prob based
-f1: 0.562249, precision: 0.578512, recall: 0.546875, accuracy:0.886458, bal_acc: 0.742788 
-
-softmax based
-f1: 0.570281, precision: 0.586777, recall: 0.554688, accuracy:0.888542, bal_acc: 0.747296 
-
-=========================================================================
-
 -----------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_7.CSV-----------
 ORIGINAL
 f1: 0.724638, precision: 0.675676, recall: 0.78125, accuracy:0.919662, bal_acc: 0.861285 
@@ -77,6 +62,21 @@ f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc:
 
 softmax based
 f1: 0.730924, precision: 0.752066, recall: 0.710938, accuracy:0.929175, bal_acc: 0.837131 
+
+=========================================================================
+
+-----------MODEL-2596727_BEST___FILE-NUE_2_2019-06-27_RANGE_1.CSV-----------
+ORIGINAL
+f1: 0.614286, precision: 0.565789, recall: 0.671875, accuracy:0.8875, bal_acc: 0.796274 
+
+Naive based
+f1: 0.626506, precision: 0.644628, recall: 0.609375, accuracy:0.903125, bal_acc: 0.778846 
+
+Prob based
+f1: 0.562249, precision: 0.578512, recall: 0.546875, accuracy:0.886458, bal_acc: 0.742788 
+
+softmax based
+f1: 0.570281, precision: 0.586777, recall: 0.554688, accuracy:0.888542, bal_acc: 0.747296 
 
 =========================================================================
 
@@ -126,3 +126,196 @@ f1: 0.596078, precision: 0.598425, recall: 0.59375, accuracy:0.892708, bal_acc: 
 
 naive f1:  0.64341
 prob f1: 0.6856
+
+
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+GENERAL DATASET RESULT USING AUGMENTED  MODEL WITH 100 EPOCHS
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_2_2019-07-10_RANGE_3.CSV-----------
+ORIGINAL
+f1: 0.902527, precision: 0.838926, recall: 0.976562, accuracy:0.96956, bal_acc: 0.972471 
+
+Naive based
+f1: 0.882812, precision: 0.882812, recall: 0.882812, accuracy:0.966178, bal_acc: 0.931525 
+
+Prob based
+f1: 0.953125, precision: 0.953125, recall: 0.953125, accuracy:0.986471, bal_acc: 0.97261 
+
+softmax based
+f1: 0.953125, precision: 0.953125, recall: 0.953125, accuracy:0.986471, bal_acc: 0.97261 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_2_2019-07-17_RANGE_6.CSV-----------
+ORIGINAL
+f1: 0.905109, precision: 0.849315, recall: 0.96875, accuracy:0.97286, bal_acc: 0.971122 
+
+Naive based
+f1: 0.921875, precision: 0.921875, recall: 0.921875, accuracy:0.979123, bal_acc: 0.954913 
+
+Prob based
+f1: 0.921875, precision: 0.921875, recall: 0.921875, accuracy:0.979123, bal_acc: 0.954913 
+
+softmax based
+f1: 0.921875, precision: 0.921875, recall: 0.921875, accuracy:0.979123, bal_acc: 0.954913 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_2_2019-08-07_RANGE_2.CSV-----------
+ORIGINAL
+f1: 0.8, precision: 0.689266, recall: 0.953125, accuracy:0.930524, bal_acc: 0.939896 
+
+Naive based
+f1: 0.747082, precision: 0.744186, recall: 0.75, accuracy:0.925968, bal_acc: 0.853 
+
+Prob based
+f1: 0.875, precision: 0.875, recall: 0.875, accuracy:0.963554, bal_acc: 0.926833 
+
+softmax based
+f1: 0.875, precision: 0.875, recall: 0.875, accuracy:0.963554, bal_acc: 0.926833 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_1_2019-06-27_RANGE_2.CSV-----------
+ORIGINAL
+f1: 0.620155, precision: 0.533333, recall: 0.740741, accuracy:0.878563, bal_acc: 0.820299 
+
+Naive based
+f1: 0.470046, precision: 0.46789, recall: 0.472222, accuracy:0.857497, bal_acc: 0.694623 
+
+Prob based
+f1: 0.564815, precision: 0.564815, recall: 0.564815, accuracy:0.883519, bal_acc: 0.748788 
+
+softmax based
+f1: 0.564815, precision: 0.564815, recall: 0.564815, accuracy:0.883519, bal_acc: 0.748788 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_1_2019-08-07_RANGE_5.CSV-----------
+ORIGINAL
+f1: 0.814516, precision: 0.721429, recall: 0.935185, accuracy:0.937922, bal_acc: 0.936787 
+
+Naive based
+f1: 0.82243, precision: 0.830189, recall: 0.814815, accuracy:0.948718, bal_acc: 0.893189 
+
+Prob based
+f1: 0.850467, precision: 0.858491, recall: 0.842593, accuracy:0.956815, bal_acc: 0.909448 
+
+softmax based
+f1: 0.859813, precision: 0.867925, recall: 0.851852, accuracy:0.959514, bal_acc: 0.914867 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_1_2019-06-27_RANGE_8.CSV-----------
+ORIGINAL
+f1: 0.692308, precision: 0.72, recall: 0.666667, accuracy:0.9199, bal_acc: 0.813073 
+
+Naive based
+f1: 0.666667, precision: 0.733333, recall: 0.611111, accuracy:0.917397, bal_acc: 0.788189 
+
+Prob based
+f1: 0.707071, precision: 0.777778, recall: 0.648148, accuracy:0.927409, bal_acc: 0.809602 
+
+softmax based
+f1: 0.707071, precision: 0.777778, recall: 0.648148, accuracy:0.927409, bal_acc: 0.809602 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_1_2019-07-17_RANGE_4.CSV-----------
+ORIGINAL
+f1: 0.926407, precision: 0.869919, recall: 0.990741, accuracy:0.979064, bal_acc: 0.984007 
+
+Naive based
+f1: 0.981481, precision: 0.981481, recall: 0.981481, accuracy:0.995074, bal_acc: 0.98932 
+
+Prob based
+f1: 0.925926, precision: 0.925926, recall: 0.925926, accuracy:0.980296, bal_acc: 0.957281 
+
+softmax based
+f1: 0.925926, precision: 0.925926, recall: 0.925926, accuracy:0.980296, bal_acc: 0.957281 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_1_2019-07-10_RANGE_1.CSV-----------
+ORIGINAL
+f1: 0.821577, precision: 0.744361, recall: 0.916667, accuracy:0.943197, bal_acc: 0.932139 
+
+Naive based
+f1: 0.824074, precision: 0.824074, recall: 0.824074, accuracy:0.949802, bal_acc: 0.897399 
+
+Prob based
+f1: 0.833333, precision: 0.833333, recall: 0.833333, accuracy:0.952444, bal_acc: 0.902799 
+
+softmax based
+f1: 0.833333, precision: 0.833333, recall: 0.833333, accuracy:0.952444, bal_acc: 0.902799 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_2_2019-06-27_RANGE_7.CSV-----------
+ORIGINAL
+f1: 0.645161, precision: 0.549451, recall: 0.78125, accuracy:0.883721, bal_acc: 0.840503 
+
+Naive based
+f1: 0.5, precision: 0.5, recall: 0.5, accuracy:0.864693, bal_acc: 0.71088 
+
+Prob based
+f1: 0.661417, precision: 0.666667, recall: 0.65625, accuracy:0.909091, bal_acc: 0.802453 
+
+softmax based
+f1: 0.669291, precision: 0.674603, recall: 0.664062, accuracy:0.911205, bal_acc: 0.80697 
+
+=========================================================================
+
+-----------MODEL-1041851_EPOCH_100_AUG___FILE-NUE_2_2019-06-27_RANGE_1.CSV-----------
+ORIGINAL
+f1: 0.625, precision: 0.520833, recall: 0.78125, accuracy:0.875, bal_acc: 0.835337 
+
+Naive based
+f1: 0.671875, precision: 0.671875, recall: 0.671875, accuracy:0.9125, bal_acc: 0.810697 
+
+Prob based
+f1: 0.606299, precision: 0.611111, recall: 0.601562, accuracy:0.895833, bal_acc: 0.771334 
+
+softmax based
+f1: 0.606299, precision: 0.611111, recall: 0.601562, accuracy:0.895833, bal_acc: 0.771334 
+
+=========================================================================
+
+
+
+FEATURE EXTRACTION RESULT
+                                video       f1  precision   recall  bal_acc  accuracy
+           NUE_1_2019-06-27_range_8    0.74886    0.73874  0.75926  0.85865   0.93116
+  artificial_NUE_1_2019-06-27_range_8  0.65600    0.57746  0.75926  0.84322   0.90773
+
+           NUE_1_2019-07-10_range_1    0.81328    0.73684  0.90741  0.92674   0.94055
+  artificial_NUE_1_2019-07-10_range_1  0.76562    0.66216  0.90741  0.92153   0.93220
+
+           NUE_1_2019-06-27_range_2    0.69264    0.65041  0.74074  0.83961   0.91202
+  artificial_NUE_1_2019-06-27_range_2  0.60837    0.51613  0.74074  0.82541   0.89066
+
+           NUE_2_2019-08-07_range_2    0.80000    0.68927  0.95312  0.93990   0.93052
+  artificial_NUE_2_2019-08-07_range_2  0.74390    0.61000  0.95312  0.93308   0.91805
+
+           NUE_2_2019-07-17_range_6    0.90511    0.84932  0.96875  0.97112   0.97286
+  artificial_NUE_2_2019-07-17_range_6  0.85517    0.76543  0.96875  0.96499   0.96209
+
+           NUE_2_2019-06-27_range_7    0.63889    0.57500  0.71875  0.81781   0.89006
+  artificial_NUE_2_2019-06-27_range_7  0.57143    0.47423  0.71875  0.80669   0.87409
+
+           NUE_1_2019-08-07_range_5    0.81452    0.72143  0.93519  0.93679   0.93792
+  artificial_NUE_1_2019-08-07_range_5  0.76806    0.65161  0.93519  0.93164   0.92899
+
+           NUE_1_2019-07-17_range_4    0.92641    0.86992  0.99074  0.98401   0.97906
+  artificial_NUE_1_2019-07-17_range_4  0.87705    0.78676  0.99074  0.97805   0.96825
+
+           NUE_2_2019-06-27_range_1    0.65190    0.54787  0.80469  0.85126   0.88542
+  artificial_NUE_2_2019-06-27_range_1  0.58857    0.46396  0.80469  0.84175   0.87027
+
+           NUE_2_2019-07-10_range_3    0.90253    0.83893  0.97656  0.97247   0.96956
+  artificial_NUE_2_2019-07-10_range_3  0.86207    0.77160  0.97656  0.96788   0.96135

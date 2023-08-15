@@ -6,8 +6,8 @@ import os
 from PIL import Image
 import random
 
-DATASET = "/home/phn501/plot-finder/dataset/general/validation.csv"
-IMG_DIR = "dataset/images"
+DATASET = "/home/phn501/plot-finder/dataset/general/train.csv"
+IMG_DIR = "/home/phn501/plot-finder/dataset/images"
 batch_size = 100
 
 class Getdata(torch.utils.data.Dataset):
@@ -90,7 +90,7 @@ mean and std:
 
 Validation: 
 mean and std: 
- tensor([0.4123, 0.1152, 0.4308]) tensor([0.3049, 0.1496, 0.2514])
+ tensor([0.4100, 0.1294, 0.4414]) tensor([0.3046, 0.1419, 0.2636])
 
 
  

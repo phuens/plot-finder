@@ -34,7 +34,7 @@ def calculate_metrics(targets, predicted):
 	bal_acc = metrics.balanced_accuracy_score(targets, predicted)
 
 	print(f"f1: {round(f1,6)}, precision: {round(precision,6)}, recall: {round(recall,6)}, accuracy:{round(accuracy,6)}, bal_acc: {round(bal_acc,6)} \n")       
-	return f1
+	return f1, precision, recall
 
 
 
@@ -46,59 +46,53 @@ def probability_based_removal(data):
 	'''
 
 	prob_based = data['predicted'].copy()
-	softmax_based = data['predicted'].copy()
 	for index in range(len(prob_based)-1):
-		if (prob_based[index] == 1) and (prob_based[index+1] == 1):
+		if prob_based[index] == 1: 
+			if index+1 < len(prob_based) and data['softmax_1'][index] < data['softmax_1'][index+1]: 
+				prob_based[index] = 0
+			
+			if index+2 < len(prob_based) and data['softmax_1'][index] < data['softmax_1'][index+2]: 
+				prob_based[index] = 0
+			
+			if index-1 >= 0 and data['softmax_1'][index] < data['softmax_1'][index-1]: 
+				prob_based[index] = 0
+			
+			if (index-2) >= 0 and data['softmax_1'][index] < data['softmax_1'][index-2]: 
+				prob_based[index] = 0   
 
-			#based on the linear output of the two classes
-			greater_prob = data['prob_1'][index] > data['prob_1'][index+1]
-			prob_based[index] = int(greater_prob)
-			prob_based[index+1] = int(not greater_prob)
-
-			# based on the softmax activation of the ouput
-			greater_prob = data['softmax_1'][index] > data['softmax_1'][index+1]
-			softmax_based[index] = int(greater_prob)
-			softmax_based[index+1] = int(not greater_prob)
-				   
-
-	return prob_based, softmax_based
+			# print(data['image'][index], "-->", prob_based[index])
+	return prob_based
 
 
-
-def process_data():
-	dir = "/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/csv"
-	softmax_f1, naive_f1, prob_f1 = [], [], []
+def process_data(folder_name=None):
+	print(folder_name)
+	folder_name = "1"
+	dir = "/home/phn501/plot-finder/predict/results/unprocessed-files/"+folder_name
+	name, f1, precision, recall = [], [], [], []
 	for file in os.listdir(dir):
-		if file.endswith(".csv"): 
-			filename = os.path.join(dir, file)
+		if file.endswith(".csv") and file != "results.csv": 
+			print(file, "\n")
+			filename 	= os.path.join(dir, file)
 			file_df 	= read_file(filename)
-			
-			# file_df 	= file_df.drop('misc', axis=1)
-			naive_based = naive_remove_duplicates(file_df)
-			prob_based, softmax_based  = probability_based_removal(file_df)
-			file_df['naive_based'] 	= naive_based
+
+			prob_based  			= probability_based_removal(file_df)			
 			file_df['prob_based'] 	= prob_based
-			file_df['softmax_based'] 	= softmax_based
+			target 					= file_df["target"]
 			
-			print(f"-----------{file.upper()}-----------")
-			target = file_df["target"]
-			print("ORIGINAL")
-			naive_f1.append(calculate_metrics(target, file_df["predicted"]))
+			f_one, prec, rec = calculate_metrics(target, prob_based)
+			name.append(file)
+			f1.append(f_one)
+			precision.append(prec)
+			recall.append(rec)
 
-			print("Naive based")
-			naive_f1.append(calculate_metrics(target, naive_based))
+			filename 	= "/home/phn501/plot-finder/predict/results/post-processed-files/"+file
+			file_df 	= file_df[["name", "target", "predicted", "prob_based"]]
+			
+			file_df.to_csv(filename, index=False)
 
-			print("Prob based")
-			prob_f1.append(calculate_metrics(target, prob_based))
+			# os.remove("/home/phn501/plot-finder/predict/results/unprocessed/"+file)
+	print(f"f1: {np.mean(f1)}, precision: {np.mean(precision)}, recall: {np.mean(recall)}")
+	df = pd.DataFrame(zip(name, f1, precision, recall), columns=["name", "f1", "precision", "recall"])
+	df.to_csv("/home/phn501/plot-finder/predict/results/result/"+str(folder_name)+"_post_processed_results.csv", index=False)
 
-			print("softmax based")
-			softmax_f1.append(calculate_metrics(target, softmax_based))
-
-			filename = "/home/phuntsho/Desktop/plot-finder/plot-finder/predict/result/csv/post-processed/"+file
-			file_df.to_csv(filename)
-			print("=========================================================================\n")
-	
-	print("softmax f1:", round(sum(softmax_f1)/len(softmax_f1), 6))
-	print("naive f1: ", round(sum(naive_f1)/len(naive_f1), 6))
-	print("prob f1:", round(sum(prob_f1)/len(prob_f1), 6))
 process_data()

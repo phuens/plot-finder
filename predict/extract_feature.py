@@ -82,8 +82,8 @@ class Predict(Classification):
         features    = np.array(self.return_features_as_1D())
         f1, precision, recall, accuracy, bal_acc = self.calc_metrics(target, predicted)
         
-        print(image_name)
-        return position, gtscore, target, image_name, features, f1, precision, recall, accuracy, bal_acc
+
+        return position, gtscore, target, image_name, features, f1, precision, recall
 
 
     def calc_metrics(self, targets, predicted):
@@ -96,8 +96,7 @@ class Predict(Classification):
         precision   = round(metrics.precision_score(targets, predicted), 5)
         recall      = round(metrics.recall_score(targets, predicted), 5)
         bal_acc     = round(metrics.balanced_accuracy_score(targets, predicted), 5)
-        print(f"f1:{f1}, precision:{precision}, recall:{recall}, accuracy:{accuracy} bal_acc:{bal_acc}")
-        print("-------------------------------------------------------")
+        
         return f1, precision, recall, accuracy, bal_acc
 
 def shuffle_data(gtscore, feature, position, target, name):
@@ -112,40 +111,47 @@ def shuffle_data(gtscore, feature, position, target, name):
         name[i]    , name[j]        = name[j], name[i]
     
     return gtscore, feature, position, target, name
-    
 
-def run(config): 
-    videos  = [] 
-    
-    metric_score = pd.DataFrame(columns=["video", "f1", "precision", "recall", "bal_acc", "accuracy"])
+def augment_features(feature): 
+    # Apply feature scaling
+    # scaling_factor = np.random.rand(1)  # Random scaling factor between 0 and 1
+    # feature_vectors = feature * scaling_factor
 
-    directory   = "dataset/score_data/emergence/validation"
-    counter     = 0
+    # # Apply feature mixup
+    # mixup_lambda = np.random.beta(0.2, 0.2)  # Random mixup coefficient using beta distribution
+    # random_indices = np.random.permutation(feature_vectors.shape[0])
+    # feature_vectors = mixup_lambda * feature_vectors + (1 - mixup_lambda) * feature_vectors[random_indices]
 
-    model_name = config['test']['name']
-    model_name = model_name.split(".")[0]
+    # Apply feature noise
+    noise_stddev = np.random.rand(1)  # Random standard deviation for Gaussian noise
+    noise = np.random.randn(*feature.shape) * noise_stddev
+    feature_vectors = feature + noise
+
+    return feature_vectors
+
+def run(config):   
+    videos      = [] 
+    count       = 0
+    directory   = "/home/phn501/plot-finder/dataset/shuffled/1"
+    model_name  = config['test']['name']
+    model_name  = model_name.split(".")[0]
     print("model name:", model_name)
-    category    = directory.split("/")[-1]
-    h5_filename = f"{model_name}_{category}_feature.h5"
-    h5_file     = h5py.File(h5_filename, 'w')
 
-    shuffle = False
+    category    = directory.split("/")[-1] # train, test or validation
+    h5_filename = f"{category}_{model_name}_feature.h5"
+    h5_file     = h5py.File(h5_filename, 'w')
+    metric_score= pd.DataFrame(columns=["video", "f1", "precision", "recall"])
 
     for file in os.listdir(directory):
         if file.endswith('.csv'):
             config['dataset']['validation_csv'] =  directory+"/"+str(file)
-
             print(f"\n {config['dataset']['validation_csv']}")
 
             model = Predict(config)
             model.setup_testing()
-            position, gtscore, target, image_name, feature, f1, precision, recall, accuracy, bal_acc = model.predict()
+            position, gtscore, target, image_name, feature, f1, precision, recall = model.predict()
 
-            if counter == 0: 
-                print(f"printing out the score just to check: \n{gtscore}")
-                counter += 1
-
-
+            
             video_name  = file.split('.')[0] 
             videos.append(str(file))
 
@@ -154,27 +160,28 @@ def run(config):
                 "f1"        : f1, 
                 "precision" : precision, 
                 "recall"    : recall, 
-                "bal_acc"   : bal_acc,
-                "accuracy"  : accuracy, 
             }, ignore_index = True)
 
-            if shuffle: 
-                gtscore, feature, position, target, image_name = shuffle_data(gtscore, feature, position, target, image_name)
-            
-            df = pd.DataFrame(zip(image_name, gtscore, feature, position, target), columns=["name", "score", "features", "position", "target"])
-            df.to_csv("randomized_feature.csv")
+            # if "train" in directory: 
+            #     feature = augment_features(feature)
+
             h5_file.create_dataset(f'{video_name}/gtscore',  data=gtscore)
             h5_file.create_dataset(f'{video_name}/features', data=feature)
             h5_file.create_dataset(f'{video_name}/position', data=position)
             h5_file.create_dataset(f'{video_name}/gttarget', data=target)
-
             # need to encode unicode to ASCII
             asciiList = [n.encode("ascii", "ignore") for n in image_name]
-
             h5_file.create_dataset(f'{video_name}/img_name', data=asciiList)
+
+            if count == 0: 
+                df = pd.DataFrame(zip(image_name, gtscore, feature, position, target), columns=["name", "score", "features", "position", "target"])
+                df.to_csv(category+"_qualitycheck_train_"+file, index=False)
+            
+            count += 1    
+
     
     h5_file.close()
     print(metric_score)
-
+    metric_score.to_csv(h5_filename+".csv", index=False)
 
 
