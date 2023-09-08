@@ -44,7 +44,7 @@ def probability_based_removal(data):
 		args:
 			data(pandas.DataFrame)
 	'''
-
+	
 	prob_based = data['predicted'].copy()
 	for index in range(len(prob_based)-1):
 		if prob_based[index] == 1: 
@@ -66,7 +66,7 @@ def probability_based_removal(data):
 
 def process_data(folder_name=None):
 	print(folder_name)
-	folder_name = "1"
+	folder_name = "ood"
 	dir = "/home/phn501/plot-finder/predict/results/unprocessed-files/"+folder_name
 	name, f1, precision, recall = [], [], [], []
 	for file in os.listdir(dir):
@@ -74,6 +74,8 @@ def process_data(folder_name=None):
 			print(file, "\n")
 			filename 	= os.path.join(dir, file)
 			file_df 	= read_file(filename)
+			file_df 	= file_df.sort_values('name')
+			file_df 	= file_df.reset_index()
 
 			prob_based  			= probability_based_removal(file_df)			
 			file_df['prob_based'] 	= prob_based
@@ -85,7 +87,7 @@ def process_data(folder_name=None):
 			precision.append(prec)
 			recall.append(rec)
 
-			filename 	= "/home/phn501/plot-finder/predict/results/post-processed-files/"+file
+			filename 	= "/home/phn501/plot-finder/predict/results/post-processed-files/"+str(folder_name)+"/"+file
 			file_df 	= file_df[["name", "target", "predicted", "prob_based"]]
 			
 			file_df.to_csv(filename, index=False)
@@ -93,6 +95,6 @@ def process_data(folder_name=None):
 			# os.remove("/home/phn501/plot-finder/predict/results/unprocessed/"+file)
 	print(f"f1: {np.mean(f1)}, precision: {np.mean(precision)}, recall: {np.mean(recall)}")
 	df = pd.DataFrame(zip(name, f1, precision, recall), columns=["name", "f1", "precision", "recall"])
-	df.to_csv("/home/phn501/plot-finder/predict/results/result/"+str(folder_name)+"_post_processed_results.csv", index=False)
+	df.to_csv("/home/phn501/plot-finder/predict/results/result/ood_results.csv", index=False)
 
-process_data()
+process_data("ood")

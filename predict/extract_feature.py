@@ -132,7 +132,7 @@ def augment_features(feature):
 def run(config):   
     videos      = [] 
     count       = 0
-    directory   = "/home/phn501/plot-finder/dataset/shuffled/1"
+    directory   = "/home/phn501/plot-finder/dataset/OOD"
     model_name  = config['test']['name']
     model_name  = model_name.split(".")[0]
     print("model name:", model_name)

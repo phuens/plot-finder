@@ -4,7 +4,7 @@ import sklearn.metrics as metrics
 
 
 def count(): 
-	filedir = "/home/phn501/plot-finder/predict/results/post-processed-files/"
+	filedir = "/home/phn501/plot-finder/predict/results/post-processed-files/shuffle/0.5/"
 	count = 0
 	NAME, MISSES, FALSE_PRED, INCONSISTENT = [], [], [], []
 	for file in os.listdir(filedir):

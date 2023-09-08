@@ -3,7 +3,7 @@ import os
 import sklearn.metrics as metrics 
 
 
-SOURCE_DIR = ""
+SOURCE_DIR = "/home/phn501/plot-finder/predict/results/unprocessed-files/original"
 
 def calc_metrics(targets, predicted):
     accuracy = round(((predicted == targets).sum() / len(predicted)),5)
@@ -44,7 +44,7 @@ def relax_f1():
 		miss, false_pred, inconsistent = [], [], [] 
 		if file.endswith(".csv"): 
 			print(file)
-			df = pd.read_csv(filedir+file)
+			df = pd.read_csv(os.path.join(filedir, file))
 			df = df.sort_values(by="name")
 			df = df.reset_index()
 			df["new_predicted"] = 0 
@@ -79,5 +79,6 @@ def relax_f1():
 		            "false prediction" : FALSE_PRED
 		        }, ignore_index = True)
 			
-			metric_score.to_csv("processed_score.csv", index=False)		
+			metric_score.to_csv("/home/phn501/plot-finder/predict/results/relaxed/relaxed_score.csv", index=False)		
 
+relax_f1()

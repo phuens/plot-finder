@@ -12,7 +12,7 @@ from train.training import Classification
 from train.dataset import PrepareDataset
 
 
-FOLDER = "1"
+FOLDER = "ood"
 
 class Predict(Classification): 
     def __init__(self, config: object) -> None:
@@ -97,7 +97,7 @@ def run(config):
     print(f'Using the model {config["test"]["name"]}')
     metric_score = pd.DataFrame(columns=["video", "f1", "precision", "recall"])
     
-    test_directory = "/home/phn501/plot-finder/dataset/shuffled/"+FOLDER
+    test_directory = "/home/phn501/plot-finder/dataset/OOD"
 
 
     for files in os.listdir(test_directory): 

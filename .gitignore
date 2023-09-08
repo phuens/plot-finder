@@ -15,6 +15,7 @@ config.yml
 */home/phn501/plot-finder/predict/result/CAM
 
 predict/*extratced_feature/
+predict/results
 
 # Distribution / packaging
 .Python
